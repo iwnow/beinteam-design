@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Клиенты — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Клиенты: только то, чего нет в app.css */
+    .client-cell { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+    .client-cell > div { min-width: 0; }
+    .chip-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; }
+    .seg-full { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    .seg-full button { height: 34px; }
+    .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
+    .stack-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .stack-head h3 { font-size: var(--fs-h3); }
+    .card .kv dt, .card .kv dd { padding: 8px 0; }
+    .amt-col { font-weight: 600; white-space: nowrap; text-align: right; }
+    .amt-col.is-muted { color: var(--text-2); font-weight: 500; }
+    .list-row .title { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+    .mask { letter-spacing: 0.04em; }
+  </style>
+</head>
+<body data-page="clients" data-crumbs="Campus Sport|Клиенты">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Клиенты</h1>
+          <p class="page-sub">1 284 клиента · 96 юр. лиц</p>
+        </div>
+        <div class="actions">
+          <button class="btn"><i data-lucide="upload"></i>Импорт</button>
+          <button class="btn btn-primary" data-drawer="drawer-client-new"><i data-lucide="user-plus"></i>Добавить клиента</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="input-wrap grow">
+          <i data-lucide="search" class="ico-sm"></i>
+          <input class="input" placeholder="Имя, компания, телефон или e-mail" aria-label="Поиск клиентов" />
+        </div>
+        <div class="chip-row" data-chip-group>
+          <button class="chip is-active">Все <span class="count">1 284</span></button>
+          <button class="chip">Частные</button>
+          <button class="chip">Юр. лица</button>
+          <button class="chip">С долгом</button>
+          <button class="chip">Без заказов 90 дней</button>
+        </div>
+      </div>
+
+      <div class="table-wrap stack-mobile">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Клиент</th>
+              <th>Телефон</th>
+              <th class="hide-mobile">E-mail</th>
+              <th class="ta-r">Заказов</th>
+              <th>Последняя бронь</th>
+              <th class="ta-r">Баланс</th>
+              <th>Канал</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">ВК</span><div><div class="cell-main">Команда «Вектор»</div><div class="cell-sub">Юридическое лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-11-22</td>
+              <td class="hide-mobile">client@example.com</td>
+              <td class="num ta-r">14</td>
+              <td class="num">21 сент. · 17:00</td>
+              <td class="num ta-r">0&nbsp;₽</td>
+              <td><span class="tag">WhatsApp</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">АК</span><div><div class="cell-main">Анна К.</div><div class="cell-sub">Частное лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-33-44</td>
+              <td class="hide-mobile">client2@example.com</td>
+              <td class="num ta-r">6</td>
+              <td class="num">20 сент. · 14:00</td>
+              <td class="num ta-r amount-plus">+1&nbsp;500&nbsp;₽</td>
+              <td><span class="tag">Telegram</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">ШС</span><div><div class="cell-main">Школа «Старт»</div><div class="cell-sub">Юридическое лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-55-66</td>
+              <td class="hide-mobile">client3@example.com</td>
+              <td class="num ta-r">23</td>
+              <td class="num">25 сент. · 13:00</td>
+              <td class="num ta-r amount-minus">−6&nbsp;750&nbsp;₽</td>
+              <td><span class="tag">E-mail</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">КО</span><div><div class="cell-main">Команда «Орбита»</div><div class="cell-sub">Юридическое лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-77-88</td>
+              <td class="hide-mobile">client4@example.com</td>
+              <td class="num ta-r">9</td>
+              <td class="num">25 сент. · 18:00</td>
+              <td class="num ta-r amount-minus">−20&nbsp;250&nbsp;₽</td>
+              <td><span class="tag">WhatsApp</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">АМ</span><div><div class="cell-main">Алексей М.</div><div class="cell-sub">Частное лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-99-00</td>
+              <td class="hide-mobile">client5@example.com</td>
+              <td class="num ta-r">3</td>
+              <td class="num">24 сент. · 15:00</td>
+              <td class="num ta-r amount-minus">−1&nbsp;200&nbsp;₽</td>
+              <td><span class="tag">SMS</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">МЛ</span><div><div class="cell-main">Мария Л.</div><div class="cell-sub">Частное лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-12-34</td>
+              <td class="hide-mobile">client6@example.com</td>
+              <td class="num ta-r">2</td>
+              <td class="num">19 сент. · 10:00</td>
+              <td class="num ta-r amount-plus">+3&nbsp;000&nbsp;₽</td>
+              <td><span class="tag">Telegram</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">КС</span><div><div class="cell-main">Команда «Сокол»</div><div class="cell-sub">Юридическое лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-23-45</td>
+              <td class="hide-mobile">client7@example.com</td>
+              <td class="num ta-r">5</td>
+              <td class="num">27 сент. · 16:00</td>
+              <td class="num ta-r amount-minus">−9&nbsp;000&nbsp;₽</td>
+              <td><span class="tag">WhatsApp</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">СВ</span><div><div class="cell-main">Спорткласс «Водный»</div><div class="cell-sub">Юридическое лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-34-56</td>
+              <td class="hide-mobile">client8@example.com</td>
+              <td class="num ta-r">11</td>
+              <td class="num">26 сент. · 11:00</td>
+              <td class="num ta-r">0&nbsp;₽</td>
+              <td><span class="tag">E-mail</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">ИС</span><div><div class="cell-main">Игорь С.</div><div class="cell-sub">Частное лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-45-67</td>
+              <td class="hide-mobile">client9@example.com</td>
+              <td class="num ta-r">0</td>
+              <td class="num subtle">—</td>
+              <td class="num ta-r">0&nbsp;₽</td>
+              <td><span class="tag">SMS</span></td>
+            </tr>
+            <tr data-drawer="drawer-client">
+              <td><div class="client-cell"><span class="avatar avatar-sm">КК</span><div><div class="cell-main">Команда «Кутузовский»</div><div class="cell-sub">Юридическое лицо</div></div></div></td>
+              <td class="num">+7 (900) 000-56-78</td>
+              <td class="hide-mobile">client10@example.com</td>
+              <td class="num ta-r">1</td>
+              <td class="num">28 сент. · 19:00</td>
+              <td class="num ta-r amount-minus">−4&nbsp;500&nbsp;₽</td>
+              <td><span class="tag">Telegram</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-foot">
+          <span>Показано 1–10 из 1 284</span>
+          <div class="pager">
+            <button class="btn btn-sm" disabled>Назад</button>
+            <button class="btn btn-sm btn-dark" aria-current="page">1</button>
+            <button class="btn btn-sm">2</button>
+            <button class="btn btn-sm">3</button>
+            <span class="subtle">…</span>
+            <button class="btn btn-sm">129</button>
+            <button class="btn btn-sm">Вперёд</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пустое состояние поиска: показывается, когда ничего не найдено. Сейчас скрыто как пример. -->
+      <div class="empty" hidden>
+        <div class="empty-ico"><i data-lucide="search-x"></i></div>
+        <h3>Никого не нашли</h3>
+        <p>Проверьте написание или поищите по телефону.</p>
+        <div style="margin-top: var(--sp-4)"><button class="btn btn-sm">Сбросить фильтры</button></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: клиент (карточка) ============ -->
+<aside class="drawer drawer-wide" id="drawer-client" aria-label="Клиент">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Клиент</div>
+      <h2>Команда «Вектор»</h2>
+      <div class="drawer-sub"><span class="tag">Юридическое лицо</span><span>Клиент с марта 2024</span></div>
+      <div class="drawer-actions">
+      <button class="btn btn-sm"><i data-lucide="message-circle" class="ico-sm"></i>WhatsApp</button>
+      <button class="btn btn-sm"><i data-lucide="phone" class="ico-sm"></i>Позвонить</button>
+      <button class="btn btn-sm" data-drawer="drawer-client-edit"><i data-lucide="pencil" class="ico-sm"></i>Изменить</button>
+      </div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body" data-tabs-scope>
+    <div class="grid-3">
+      <div class="stat"><span class="stat-label">Баланс счёта</span><span class="stat-value money">0&nbsp;₽</span></div>
+      <div class="stat"><span class="stat-label">Заказов</span><span class="stat-value">14</span></div>
+      <div class="stat"><span class="stat-label">Оплачено за всё время</span><span class="stat-value money">1&nbsp;920&nbsp;000&nbsp;₽</span></div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="is-active" data-tab="orders">Заказы · 14</button>
+      <button data-tab="legal">Юр. лица · 2</button>
+      <button data-tab="contacts">Контакты</button>
+      <button data-tab="events">События</button>
+    </div>
+
+    <!-- Заказы -->
+    <div data-tab-panel="orders" class="is-active">
+      <div class="list">
+        <div class="list-row" data-drawer="drawer-order-stub">
+          <div class="grow">
+            <div class="title">Заказ #116045 <span class="badge badge-confirmed">Подтверждён</span></div>
+            <div class="sub">Авиамоторная · Футбольный манеж 34 × 18</div>
+            <div class="sub">22 сентября · 20:00–21:30</div>
+          </div>
+          <div class="amt-col">13&nbsp;500&nbsp;₽</div>
+        </div>
+        <div class="list-row" data-drawer="drawer-order-stub">
+          <div class="grow">
+            <div class="title">Заказ #115980 <span class="badge badge-paid">Оплачен</span></div>
+            <div class="sub">Авиамоторная 2 · Баскетбольный зал</div>
+            <div class="sub">12 сентября · 18:00–19:00</div>
+          </div>
+          <div class="amt-col">6&nbsp;750&nbsp;₽</div>
+        </div>
+        <div class="list-row" data-drawer="drawer-order-stub">
+          <div class="grow">
+            <div class="title">Заказ #115301 <span class="badge badge-error">Отменён</span></div>
+            <div class="sub">Водный · Зал 15 × 15</div>
+            <div class="sub">3 сентября · 10:00–12:00</div>
+          </div>
+          <div class="amt-col is-muted">0&nbsp;₽</div>
+        </div>
+      </div>
+      <p class="subtle" style="margin-top: var(--sp-3)">Показаны последние 3 из 14 · <a class="link-accent" href="orders.html">Все заказы →</a></p>
+    </div>
+
+    <!-- Юр. лица -->
+    <div data-tab-panel="legal">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <h3>ООО «Вектор»</h3>
+            <button class="btn btn-sm" data-drawer="drawer-legal"><i data-lucide="pencil" class="ico-sm"></i>Изменить</button>
+          </div>
+          <dl class="kv">
+            <dt>ИНН</dt><dd class="num mask">7701 •••• 58</dd>
+            <dt>КПП</dt><dd class="num mask">770••• •••</dd>
+            <dt>ОГРН</dt><dd class="num mask">1•• •••• •••• ••4</dd>
+            <dt>Р/с</dt><dd class="num mask">40702 •••• •••• 0197</dd>
+            <dt>К/с</dt><dd class="num mask">30101 •••• •••• 0412</dd>
+            <dt>БИК</dt><dd class="num mask">044 ••• •••</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>ООО «Вектор Спорт»</h3>
+            <button class="btn btn-sm" data-drawer="drawer-legal"><i data-lucide="pencil" class="ico-sm"></i>Изменить</button>
+          </div>
+          <dl class="kv">
+            <dt>ИНН</dt><dd class="num mask">7702 •••• 13</dd>
+            <dt>КПП</dt><dd class="num mask">770••• •••</dd>
+            <dt>ОГРН</dt><dd class="num mask">1•• •••• •••• ••9</dd>
+            <dt>Р/с</dt><dd class="num mask">40702 •••• •••• 5521</dd>
+            <dt>К/с</dt><dd class="num mask">30101 •••• •••• 0412</dd>
+            <dt>БИК</dt><dd class="num mask">044 ••• •••</dd>
+          </dl>
+        </div>
+        <button class="btn btn-block" data-drawer="drawer-legal"><i data-lucide="plus"></i>Юр. лицо</button>
+      </div>
+    </div>
+
+    <!-- Контакты -->
+    <div data-tab-panel="contacts">
+      <dl class="kv">
+        <dt>Имя</dt><dd>Ирина</dd>
+        <dt>Фамилия</dt><dd>Смирнова</dd>
+        <dt>Телефон</dt><dd class="num">+7 (900) 000-11-22</dd>
+        <dt>Телефон 2</dt><dd class="subtle">—</dd>
+        <dt>E-mail</dt><dd>client@example.com</dd>
+        <dt>Канал уведомлений</dt><dd><span class="tag">WhatsApp / MAX</span></dd>
+        <dt>Уведомления</dt><dd><span class="badge badge-paid">Включены</span></dd>
+        <dt>Комментарий</dt><dd>Нужны манишки, 2 комплекта</dd>
+      </dl>
+    </div>
+
+    <!-- События -->
+    <div data-tab-panel="events">
+      <div class="timeline">
+        <div class="tl-item"><span class="tl-dot"><i data-lucide="plus"></i></span><div><div class="tl-text">Клиент создан</div><div class="tl-meta">Клиент с сайта · 14 мар 2024, 12:20</div></div></div>
+        <div class="tl-item"><span class="tl-dot"><i data-lucide="phone"></i></span><div><div class="tl-text">Изменён телефон: +7 (900) 000-11-21 → +7 (900) 000-11-22</div><div class="tl-meta">Вера Администратор · 3 сен, 10:12</div></div></div>
+        <div class="tl-item"><span class="tl-dot"><i data-lucide="credit-card"></i></span><div><div class="tl-text">Оплата заказа #115980 · 6 750 ₽</div><div class="tl-meta">Система · 12 сен, 18:40</div></div></div>
+        <div class="tl-item"><span class="tl-dot"><i data-lucide="link"></i></span><div><div class="tl-text">Отправлена ссылка на оплату</div><div class="tl-meta">Вера Администратор · 20 сен, 11:05</div></div></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ Панель: редактирование клиента (стек поверх карточки) ============ -->
+<aside class="drawer" id="drawer-client-edit" aria-label="Редактирование клиента">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Клиент · Команда «Вектор»</div><h2>Редактирование</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div class="field"><label>Имя *</label><input class="input" value="Ирина" /></div>
+      <div class="field"><label>Фамилия *</label><input class="input" value="Смирнова" /></div>
+      <div class="field span-2">
+        <label>Отображаемое имя</label>
+        <input class="input" placeholder="Фамилия Имя" />
+        <span class="hint">Если пусто — Фамилия Имя</span>
+      </div>
+      <div class="field"><label>Телефон</label><input class="input num" value="+7 (900) 000-11-22" /></div>
+      <div class="field"><label>Телефон 2</label><input class="input num" placeholder="+7 (___) ___-__-__" /></div>
+      <div class="field span-2 is-invalid">
+        <label>E-mail</label>
+        <input class="input" value="smirnova@exmpl" />
+        <span class="error-text">Некорректный e-mail</span>
+      </div>
+      <div class="field span-2">
+        <label>Канал уведомлений</label>
+        <select class="select">
+          <option selected>WhatsApp / MAX</option>
+          <option>Telegram</option>
+          <option>SMS</option>
+          <option>E-mail</option>
+        </select>
+      </div>
+      <div class="field span-2">
+        <label class="switch"><input type="checkbox" checked /><span>Уведомления о бронях и оплатах</span></label>
+      </div>
+      <div class="field span-2">
+        <label>Комментарий</label>
+        <textarea class="textarea">Нужны манишки, 2 комплекта</textarea>
+      </div>
+    </div>
+
+    <div class="danger-zone">
+      <h3>Опасная зона</h3>
+      <p class="muted">Клиента можно удалить, если у него нет активных броней. История заказов останется в отчётах.</p>
+      <div><button class="btn btn-danger" data-toast="Клиент удалён" data-toast-action="Вернуть"><i data-lucide="trash-2"></i>Удалить клиента</button></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Изменения сохранены" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: новый клиент ============ -->
+<aside class="drawer" id="drawer-client-new" aria-label="Новый клиент">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Клиенты</div><h2>Новый клиент</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="seg seg-full" role="group" aria-label="Тип клиента">
+      <button class="is-active">Частное лицо</button>
+      <button>Юр. лицо</button>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Имя *</label><input class="input" /></div>
+      <div class="field"><label>Фамилия *</label><input class="input" /></div>
+      <div class="field span-2"><label>Телефон *</label><input class="input num" placeholder="+7 (___) ___-__-__" /></div>
+      <div class="summary-box span-2">
+        <div class="row">
+          <span>Похожий клиент найден: <b>Анна К.</b>, +7 (900) 000-11-22</span>
+          <button class="btn btn-sm" data-drawer="drawer-client">Открыть</button>
+        </div>
+      </div>
+      <div class="field span-2"><label>E-mail</label><input class="input" placeholder="client@example.com" /></div>
+      <div class="field span-2">
+        <label>Канал уведомлений</label>
+        <select class="select">
+          <option>WhatsApp / MAX</option>
+          <option>Telegram</option>
+          <option>SMS</option>
+          <option>E-mail</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Клиент создан" data-close-after><i data-lucide="check"></i>Создать</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: юридическое лицо ============ -->
+<aside class="drawer" id="drawer-legal" aria-label="Юридическое лицо">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Клиент · Команда «Вектор»</div><h2>Юридическое лицо</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div class="field span-2"><label>Наименование *</label><input class="input" value="ООО «Вектор»" /></div>
+      <div class="field span-2">
+        <label>Клиент</label>
+        <select class="select">
+          <option selected>Команда «Вектор»</option>
+          <option>Команда «Орбита»</option>
+        </select>
+      </div>
+      <div class="field"><label>ИНН</label><input class="input num" placeholder="10 или 12 цифр" /></div>
+      <div class="field"><label>КПП</label><input class="input num" placeholder="9 цифр" /></div>
+      <div class="field"><label>ОГРН</label><input class="input num" placeholder="13 или 15 цифр" /></div>
+      <div class="field"><label>БИК</label><input class="input num" placeholder="9 цифр" /></div>
+      <div class="field span-2"><label>Расчётный счёт</label><input class="input num" placeholder="20 цифр" /></div>
+      <div class="field span-2"><label>Корр. счёт</label><input class="input num" placeholder="20 цифр" /></div>
+      <div class="field span-2"><label>Юр. адрес</label><textarea class="textarea" placeholder="Индекс, город, улица, дом"></textarea></div>
+      <label class="check span-2"><input type="checkbox" checked /> Совпадает с юридическим</label>
+      <div class="field span-2"><label>Факт. адрес</label><textarea class="textarea" disabled placeholder="Индекс, город, улица, дом"></textarea></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Юр. лицо сохранено" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: заказ (краткая карточка) ============ -->
+<aside class="drawer" id="drawer-order-stub" aria-label="Заказ">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Заказ</div>
+      <h2>#116045 · Команда «Вектор»</h2>
+      <div class="drawer-sub"><span class="badge badge-confirmed">Подтверждён</span><span>22 сентября · 20:00–21:30</span></div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="hero-money"><div><div class="overline">Осталось оплатить</div><div class="big money">13&nbsp;500&nbsp;₽</div></div></div>
+    <dl class="kv">
+      <dt>Объект</dt><dd>Авиамоторная</dd>
+      <dt>Площадка</dt><dd>Футбольный манеж 34 × 18</dd>
+      <dt>Позиции</dt><dd>Аренда площадки · 2 ч</dd>
+      <dt>Источник</dt><dd><span class="tag">Сайт</span></dd>
+    </dl>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Закрыть</button>
+    <a class="btn btn-primary" href="orders.html#order"><i data-lucide="arrow-right"></i>Открыть в Заказах</a>
+  </div>
+</aside>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Настройки — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Общее: переменные-теги в шаблоне сообщения */
+    .var-tag { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--accent-text); font-weight: 500; }
+    .var-tag:hover { border-color: var(--accent); }
+    .tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+
+    /* Шкала периодов суток */
+    .scale { display: flex; height: 8px; border-radius: var(--r-pill); overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); }
+    .scale > i { display: block; height: 100%; }
+    .scale > .lo { background: var(--surface-3); }
+    .scale > .hi { background: var(--accent); }
+    .scale-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-top: 4px; }
+    .scale-legend { display: flex; gap: var(--sp-4); font-size: var(--fs-xs); color: var(--text-2); margin-top: 6px; }
+    .scale-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .scale-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .scale-legend .lo-c { background: var(--surface-3); }
+    .scale-legend .hi-c { background: var(--accent); }
+
+    /* Карточки тарифов */
+    .tariff { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .tariff h3 { font-size: var(--fs-h3); }
+    .tariff .tariff-foot { margin-top: auto; font-size: var(--fs-xs); color: var(--text-3); }
+
+    /* Дни недели (кружки) */
+    .wd-row { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+    .wd { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 500; border: 1px solid var(--line); background: var(--surface); color: var(--text-3); }
+    .wd.is-on { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; font-weight: 600; }
+
+    /* Персона в таблице */
+    .person { display: flex; align-items: center; gap: var(--sp-3); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    /* Панели: строки формы */
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .period-row { display: grid; grid-template-columns: 1fr 1fr 1.2fr 36px; gap: var(--sp-2); align-items: end; }
+    .period-row .icon-btn { width: 36px; height: var(--control-h); }
+    .input-wrap .input.has-suffix { padding-right: 36px; }
+    .day-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 96px 96px; gap: var(--sp-2); align-items: center; }
+    .day-row.is-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); }
+    .day-row .day-name { font-weight: 600; }
+    .day-row .switch span { font-size: var(--fs-sm); }
+    .access-obj { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-md); }
+    .access-obj-name { display: flex; align-items: baseline; gap: var(--sp-2); }
+    .access-obj-name b { font-weight: 600; }
+
+    /* Интеграции */
+    .integ { display: flex; flex-direction: column; }
+    .integ-head { display: flex; gap: var(--sp-3); align-items: flex-start; }
+    .integ-head h3 { font-size: var(--fs-h3); }
+    .integ-head .subtle { font-size: var(--fs-sm); }
+    .integ-ico { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; flex: none; }
+    .integ-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-top: auto; padding-top: var(--sp-4); }
+
+    @media (max-width: 767px) {
+      .period-row { grid-template-columns: 1fr 1fr; }
+      .period-row .field.price { grid-column: 1 / -1; }
+      .day-row { grid-template-columns: 36px minmax(0, 1fr) 84px 84px; }
+    }
+  </style>
+</head>
+<body data-page="settings" data-crumbs="Campus Sport|Настройки">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Настройки компании</h1>
+          <p class="page-sub">Campus Sport · тарифы, расписание площадок, доступ сотрудников и интеграции</p>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="is-active" data-tab="general">Общее</button>
+        <button data-tab="tariffs">Тарифы</button>
+        <button data-tab="rules">Правила тарифов</button>
+        <button data-tab="schedule">График работы</button>
+        <button data-tab="access">Сотрудники и доступ</button>
+        <button data-tab="integrations">Интеграции</button>
+      </div>
+
+      <!-- ============ Общее ============ -->
+      <section data-tab-panel="general" class="is-active">
+        <div class="card">
+          <div class="card-head"><h3>Общие параметры</h3></div>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="company-name">Название компании</label>
+              <input id="company-name" class="input" value="Campus Sport" />
+            </div>
+            <div class="field span-2">
+              <label for="return-url">Ссылка возврата после оплаты</label>
+              <div class="input-wrap"><i data-lucide="link" class="ico-sm"></i><input id="return-url" class="input" value="https://campus-sport.ru/payment/done" /></div>
+              <span class="hint">Куда ЮKassa вернёт клиента после оплаты (yookassa_return_url)</span>
+            </div>
+            <div class="field span-2">
+              <label for="msg-tpl">Шаблон сообщения со ссылкой на оплату</label>
+              <textarea id="msg-tpl" class="textarea" rows="4">Здравствуйте! Оплатите бронь на площадке {place} на {time}: {link}</textarea>
+              <div class="tags-row">
+                <span class="hint">Переменные:</span>
+                <button type="button" class="tag var-tag" data-toast="Переменная {link} вставлена в шаблон">{link}</button>
+                <button type="button" class="tag var-tag" data-toast="Переменная {place} вставлена в шаблон">{place}</button>
+                <button type="button" class="tag var-tag" data-toast="Переменная {time} вставлена в шаблон">{time}</button>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn btn-primary" data-toast="Настройки сохранены"><i data-lucide="check"></i>Сохранить</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Тарифы ============ -->
+      <section data-tab-panel="tariffs">
+        <div class="toolbar">
+          <span class="muted">Тарифов: 4 · цена за 1 час аренды</span>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" data-drawer="drawer-tariff"><i data-lucide="plus"></i>Добавить тариф</button>
+        </div>
+        <div class="grid grid-3">
+          <div class="card card-link tariff" data-drawer="drawer-tariff">
+            <div class="card-head" style="margin:0"><h3>Будни день</h3><span class="tag">по умолчанию</span></div>
+            <div class="muted">4 500 ₽ / ч</div>
+            <div>
+              <div class="scale"><i class="lo" style="flex:9"></i><i class="hi" style="flex:6"></i></div>
+              <div class="scale-labels"><span>08:00</span><span>17:00</span><span>23:00</span></div>
+            </div>
+            <div class="list">
+              <div class="list-row"><div class="grow"><div class="title">08:00–17:00</div></div><span class="money">4 500 ₽</span></div>
+              <div class="list-row"><div class="grow"><div class="title">17:00–23:00</div></div><span class="money">6 750 ₽</span></div>
+            </div>
+            <div class="tariff-foot">Правил: 2 · площадок: 2</div>
+          </div>
+          <div class="card card-link tariff" data-drawer="drawer-tariff">
+            <div class="card-head" style="margin:0"><h3>Будни вечер</h3></div>
+            <div class="muted">6 750 ₽ / ч</div>
+            <div>
+              <div class="scale"><i style="flex:9"></i><i class="hi" style="flex:6"></i></div>
+              <div class="scale-labels"><span>08:00</span><span>17:00</span><span>23:00</span></div>
+            </div>
+            <div class="list">
+              <div class="list-row"><div class="grow"><div class="title">17:00–23:00</div></div><span class="money">6 750 ₽</span></div>
+            </div>
+            <div class="tariff-foot">Правил: 3 · площадок: 2</div>
+          </div>
+          <div class="card card-link tariff" data-drawer="drawer-tariff">
+            <div class="card-head" style="margin:0"><h3>Выходные</h3></div>
+            <div class="muted">7 500 ₽ / ч</div>
+            <div>
+              <div class="scale"><i class="lo" style="flex:7"></i><i class="hi" style="flex:8"></i></div>
+              <div class="scale-labels"><span>08:00</span><span>15:00</span><span>23:00</span></div>
+            </div>
+            <div class="list">
+              <div class="list-row"><div class="grow"><div class="title">09:00–15:00</div></div><span class="money">6 750 ₽</span></div>
+              <div class="list-row"><div class="grow"><div class="title">15:00–23:00</div></div><span class="money">7 500 ₽</span></div>
+            </div>
+            <div class="tariff-foot">Правил: 2 · площадок: 3</div>
+          </div>
+          <div class="card card-link tariff" data-drawer="drawer-tariff">
+            <div class="card-head" style="margin:0"><h3>Детские секции</h3></div>
+            <div class="muted">3 000 ₽ / ч</div>
+            <div>
+              <div class="scale"><i style="flex:8"></i><i class="hi" style="flex:4"></i></div>
+              <div class="scale-labels"><span>08:00</span><span>16:00</span><span>20:00</span></div>
+            </div>
+            <div class="list">
+              <div class="list-row"><div class="grow"><div class="title">16:00–20:00</div></div><span class="money">3 500 ₽</span></div>
+            </div>
+            <div class="tariff-foot">Правил: 1 · площадок: 1</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Правила тарифов ============ -->
+      <section data-tab-panel="rules">
+        <div class="toolbar">
+          <span class="muted">Правило связывает площадку и секцию с тарифом на период</span>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" data-drawer="drawer-rule"><i data-lucide="plus"></i>Добавить правило</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Площадка</th>
+                <th>Секция</th>
+                <th>Тариф</th>
+                <th>Период</th>
+                <th>Дни недели</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-drawer="drawer-rule">
+                <td><div class="cell-main">Футбольный манеж 34 × 18</div><div class="cell-sub">Авиамоторная</div></td>
+                <td>Вся площадка</td>
+                <td>Будни вечер</td>
+                <td class="num">01.09.2026 – 31.05.2027</td>
+                <td>
+                  <div class="wd-row">
+                    <span class="wd is-on">Пн</span><span class="wd is-on">Вт</span><span class="wd is-on">Ср</span><span class="wd is-on">Чт</span><span class="wd is-on">Пт</span><span class="wd">Сб</span><span class="wd">Вс</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-drawer="drawer-rule">
+                <td><div class="cell-main">Футбольный манеж 34 × 18</div><div class="cell-sub">Авиамоторная</div></td>
+                <td>Вся площадка</td>
+                <td>Выходные</td>
+                <td class="num">01.09.2026 – 31.05.2027</td>
+                <td>
+                  <div class="wd-row">
+                    <span class="wd">Пн</span><span class="wd">Вт</span><span class="wd">Ср</span><span class="wd">Чт</span><span class="wd">Пт</span><span class="wd is-on">Сб</span><span class="wd is-on">Вс</span>
+                  </div>
+                </td>
+              </tr>
+              <tr data-drawer="drawer-rule">
+                <td><div class="cell-main">Мини-поле 20 × 10</div><div class="cell-sub">Авиамоторная 2</div></td>
+                <td>Секция 1</td>
+                <td>Детские секции</td>
+                <td class="num">01.09.2026 – 31.05.2027</td>
+                <td>
+                  <div class="wd-row">
+                    <span class="wd">Пн</span><span class="wd is-on">Вт</span><span class="wd">Ср</span><span class="wd is-on">Чт</span><span class="wd">Пт</span><span class="wd">Сб</span><span class="wd">Вс</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot"><span>Правил: 3</span><span class="subtle">Строка открывает правило в панели</span></div>
+        </div>
+      </section>
+
+      <!-- ============ График работы ============ -->
+      <section data-tab-panel="schedule">
+        <div class="toolbar">
+          <span class="muted">Часы работы площадок по дням недели</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Площадка</th>
+                <th>Период</th>
+                <th>Пн–Вс</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-drawer="drawer-worksched">
+                <td><div class="cell-main">Футбольный манеж 34 × 18</div><div class="cell-sub">Авиамоторная</div></td>
+                <td class="num">01.09.2026 – 31.05.2027</td>
+                <td><div class="num">Пн–Пт 08:00–23:00</div><div class="cell-sub">Сб–Вс 09:00–22:00</div></td>
+              </tr>
+              <tr data-drawer="drawer-worksched">
+                <td><div class="cell-main">Баскетбольный зал</div><div class="cell-sub">Авиамоторная 2</div></td>
+                <td class="num">01.09.2026 – 31.05.2027</td>
+                <td><div class="num">Пн–Пт 09:00–23:00</div><div class="cell-sub">Сб–Вс 10:00–22:00</div></td>
+              </tr>
+              <tr data-drawer="drawer-worksched">
+                <td><div class="cell-main">Зал 15 × 15</div><div class="cell-sub">Водный</div></td>
+                <td class="num">01.09.2026 – 31.05.2027</td>
+                <td><div class="num">Пн–Вс 08:00–22:00</div><div class="cell-sub">Пн–Пт без выходных</div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ Сотрудники и доступ ============ -->
+      <section data-tab-panel="access">
+        <div class="toolbar">
+          <span class="muted">Сотрудников: 3</span>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" data-toast="Приглашение отправлено на почту"><i data-lucide="user-plus"></i>Пригласить сотрудника</button>
+        </div>
+        <div class="table-wrap stack-mobile">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Сотрудник</th>
+                <th>Роль в компании</th>
+                <th>Объекты</th>
+                <th>Права на объектах</th>
+                <th>Последний вход</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-drawer="drawer-access">
+                <td>
+                  <div class="person">
+                    <span class="avatar avatar-sm">ВА</span>
+                    <div><div class="cell-main">Вера Администратор</div><div class="cell-sub">vera</div></div>
+                  </div>
+                </td>
+                <td>Администратор компании</td>
+                <td>
+                  <div class="tag-row"><span class="tag">Авиамоторная</span><span class="tag">Водный</span></div>
+                </td>
+                <td>
+                  <div class="tag-row"><span class="tag">Администратор</span></div>
+                </td>
+                <td class="num">сегодня, 09:12</td>
+              </tr>
+              <tr data-drawer="drawer-access">
+                <td>
+                  <div class="person">
+                    <span class="avatar avatar-sm">ИК</span>
+                    <div><div class="cell-main">Илья Кассир</div><div class="cell-sub">ilya</div></div>
+                  </div>
+                </td>
+                <td>Сотрудник</td>
+                <td>
+                  <div class="tag-row"><span class="tag">Авиамоторная</span></div>
+                </td>
+                <td>
+                  <div class="tag-row"><span class="tag">Инкассатор</span><span class="tag">Просмотр</span></div>
+                </td>
+                <td class="num">вчера, 21:40</td>
+              </tr>
+              <tr data-drawer="drawer-access">
+                <td>
+                  <div class="person">
+                    <span class="avatar avatar-sm">МТ</span>
+                    <div><div class="cell-main">Мария Тренер</div><div class="cell-sub">masha</div></div>
+                  </div>
+                </td>
+                <td>Тренер</td>
+                <td>
+                  <div class="tag-row"><span class="tag">Авиамоторная 2</span></div>
+                </td>
+                <td>
+                  <div class="tag-row"><span class="tag">Задачи — создание</span><span class="tag">Задачи — модерация</span></div>
+                </td>
+                <td class="num">02 ноября, 18:05</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ Интеграции ============ -->
+      <section data-tab-panel="integrations">
+        <div class="grid grid-3">
+          <div class="card integ">
+            <div class="integ-head">
+              <span class="integ-ico"><i data-lucide="credit-card"></i></span>
+              <div><h3>ЮKassa</h3><span class="subtle">Приём оплат и ссылки на оплату брони</span></div>
+            </div>
+            <div class="integ-foot">
+              <span class="badge badge-paid">Подключено</span>
+              <button class="btn btn-sm" data-toast="Открываем настройки ЮKassa">Настроить</button>
+            </div>
+          </div>
+          <div class="card integ">
+            <div class="integ-head">
+              <span class="integ-ico"><i data-lucide="message-circle"></i></span>
+              <div><h3>WhatsApp / WhatCRM</h3><span class="subtle">Чат с клиентами и уведомления о бронях</span></div>
+            </div>
+            <div class="integ-foot">
+              <span class="badge badge-paid">Подключено</span>
+              <button class="btn btn-sm" data-toast="Открываем настройки WhatsApp">Настроить</button>
+            </div>
+          </div>
+          <div class="card integ">
+            <div class="integ-head">
+              <span class="integ-ico"><i data-lucide="send"></i></span>
+              <div><h3>Telegram-бот входа</h3><span class="subtle">Вход сотрудников через Telegram</span></div>
+            </div>
+            <div class="integ-foot">
+              <span class="badge">Не настроено</span>
+              <button class="btn btn-sm" data-toast="Открываем настройки Telegram-бота">Настроить</button>
+            </div>
+          </div>
+          <div class="card integ">
+            <div class="integ-head">
+              <span class="integ-ico"><i data-lucide="chart-column"></i></span>
+              <div><h3>Superset-отчёты</h3><span class="subtle">Встроенные дашборды во вкладке «Отчёты»</span></div>
+            </div>
+            <div class="integ-foot">
+              <span class="badge badge-paid">Подключено</span>
+              <button class="btn btn-sm" data-toast="Открываем настройки Superset">Настроить</button>
+            </div>
+          </div>
+          <div class="card integ">
+            <div class="integ-head">
+              <span class="integ-ico"><i data-lucide="webhook"></i></span>
+              <div><h3>Точка банк (webhook)</h3><span class="subtle">Поступления на счёт сопоставляются с оплатами заказов</span></div>
+            </div>
+            <div class="integ-foot">
+              <span class="badge">Не настроено</span>
+              <button class="btn btn-sm" data-toast="Открываем настройки Точка банк">Настроить</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: тариф ============ -->
+<aside class="drawer" id="drawer-tariff" aria-label="Тариф">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Настройки · Тарифы</div>
+      <h2>Тариф</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label for="t-name">Название*</label>
+      <input id="t-name" class="input" value="Будни день" />
+    </div>
+    <div class="field">
+      <label for="t-default">Цена по умолчанию</label>
+      <div class="input-wrap"><input id="t-default" class="input num has-suffix" value="4 500" /><span class="suffix">₽/ч</span></div>
+    </div>
+    <div class="drawer-section">
+      <h3>Периоды</h3>
+      <div class="list">
+        <div class="period-row">
+          <div class="field"><label>С</label><input class="input" type="time" value="08:00" aria-label="Период с" /></div>
+          <div class="field"><label>До</label><input class="input" type="time" value="17:00" aria-label="Период до" /></div>
+          <div class="field price"><label>Цена</label><div class="input-wrap"><input class="input num has-suffix" value="4 500" aria-label="Цена периода" /><span class="suffix">₽</span></div></div>
+          <button class="icon-btn" aria-label="Удалить период" data-toast="Период удалён" data-toast-action="Вернуть"><i data-lucide="trash-2" class="ico-sm"></i></button>
+        </div>
+        <div class="period-row" style="margin-top:var(--sp-3)">
+          <div class="field"><label>С</label><input class="input" type="time" value="17:00" aria-label="Период с" /></div>
+          <div class="field"><label>До</label><input class="input" type="time" value="23:00" aria-label="Период до" /></div>
+          <div class="field price"><label>Цена</label><div class="input-wrap"><input class="input num has-suffix" value="6 750" aria-label="Цена периода" /><span class="suffix">₽</span></div></div>
+          <button class="icon-btn" aria-label="Удалить период" data-toast="Период удалён" data-toast-action="Вернуть"><i data-lucide="trash-2" class="ico-sm"></i></button>
+        </div>
+      </div>
+      <div style="margin-top:var(--sp-3)">
+        <button class="btn btn-ghost btn-sm">+ период</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Предпросмотр суток</label>
+      <div class="scale"><i style="flex:8"></i><i class="lo" style="flex:9"></i><i class="hi" style="flex:6"></i><i style="flex:1"></i></div>
+      <div class="scale-labels"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+      <div class="scale-legend">
+        <span><i class="lo-c"></i>4 500 ₽</span>
+        <span><i class="hi-c"></i>6 750 ₽</span>
+        <span class="subtle">вне периодов — цена по умолчанию</span>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Тариф сохранён" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: правило тарифа ============ -->
+<aside class="drawer" id="drawer-rule" aria-label="Правило тарифа">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Правила тарифов</div>
+      <h2>Правило тарифа</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Площадка</label>
+      <select class="select">
+        <option>Футбольный манеж 34 × 18</option>
+        <option>Баскетбольный зал</option>
+        <option>Мини-поле 20 × 10</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Секция</label>
+      <select class="select">
+        <option>Вся площадка</option>
+        <option>Секция 1</option>
+        <option>Секция 2</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Тариф</label>
+      <select class="select">
+        <option>Будни день</option>
+        <option selected>Будни вечер</option>
+        <option>Выходные</option>
+        <option>Детские секции</option>
+      </select>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Дата с</label><input class="input" type="date" value="2026-09-01" /></div>
+      <div class="field"><label>Дата по</label><input class="input" type="date" value="2027-05-31" /></div>
+    </div>
+    <div class="field">
+      <label>Дни недели</label>
+      <div class="chips" data-chip-group="multi">
+        <button class="chip is-active">Пн</button>
+        <button class="chip is-active">Вт</button>
+        <button class="chip is-active">Ср</button>
+        <button class="chip is-active">Чт</button>
+        <button class="chip is-active">Пт</button>
+        <button class="chip">Сб</button>
+        <button class="chip">Вс</button>
+      </div>
+      <span class="hint">Правило действует только в выбранные дни</span>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Правило сохранено" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: график работы ============ -->
+<aside class="drawer" id="drawer-worksched" aria-label="График работы">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Настройки · График работы</div>
+      <h2>График работы</h2>
+      <div class="drawer-sub">Футбольный манеж 34 × 18</div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Площадка</label>
+      <select class="select">
+        <option>Футбольный манеж 34 × 18</option>
+        <option>Баскетбольный зал</option>
+        <option>Зал 15 × 15</option>
+      </select>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Период с</label><input class="input" type="date" value="2026-09-01" /></div>
+      <div class="field"><label>Период по</label><input class="input" type="date" value="2027-05-31" /></div>
+    </div>
+    <div class="drawer-section">
+      <h3>По дням недели</h3>
+      <div class="day-row is-head"><span>День</span><span>Режим</span><span>С</span><span>До</span></div>
+      <div class="list">
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Пн</span><label class="switch"><input type="checkbox" checked aria-label="Пн работает" /><span>Работает</span></label><input class="input" type="time" value="08:00" aria-label="Пн с" /><input class="input" type="time" value="23:00" aria-label="Пн до" /></div>
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Вт</span><label class="switch"><input type="checkbox" checked aria-label="Вт работает" /><span>Работает</span></label><input class="input" type="time" value="08:00" aria-label="Вт с" /><input class="input" type="time" value="23:00" aria-label="Вт до" /></div>
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Ср</span><label class="switch"><input type="checkbox" checked aria-label="Ср работает" /><span>Работает</span></label><input class="input" type="time" value="08:00" aria-label="Ср с" /><input class="input" type="time" value="23:00" aria-label="Ср до" /></div>
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Чт</span><label class="switch"><input type="checkbox" checked aria-label="Чт работает" /><span>Работает</span></label><input class="input" type="time" value="08:00" aria-label="Чт с" /><input class="input" type="time" value="23:00" aria-label="Чт до" /></div>
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Пт</span><label class="switch"><input type="checkbox" checked aria-label="Пт работает" /><span>Работает</span></label><input class="input" type="time" value="08:00" aria-label="Пт с" /><input class="input" type="time" value="23:00" aria-label="Пт до" /></div>
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Сб</span><label class="switch"><input type="checkbox" checked aria-label="Сб работает" /><span>Работает</span></label><input class="input" type="time" value="09:00" aria-label="Сб с" /><input class="input" type="time" value="22:00" aria-label="Сб до" /></div>
+        <div class="day-row" style="margin-top:var(--sp-3)"><span class="day-name">Вс</span><label class="switch"><input type="checkbox" checked aria-label="Вс работает" /><span>Работает</span></label><input class="input" type="time" value="09:00" aria-label="Вс с" /><input class="input" type="time" value="22:00" aria-label="Вс до" /></div>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="График сохранён" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: доступ сотрудника ============ -->
+<aside class="drawer" id="drawer-access" aria-label="Доступ сотрудника">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Сотрудники и доступ</div>
+      <h2>Вера Администратор</h2>
+      <div class="drawer-sub">vera · Администратор компании</div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Сотрудник</label>
+      <select class="select">
+        <option selected>Вера Администратор · vera</option>
+        <option>Илья Кассир · ilya</option>
+        <option>Мария Тренер · masha</option>
+      </select>
+    </div>
+    <div class="drawer-section">
+      <h3>Доступ по объектам</h3>
+      <div class="list">
+        <div class="access-obj">
+          <div class="access-obj-name"><b>Авиамоторная</b><span class="subtle">объект</span></div>
+          <div class="chips" data-chip-group="multi">
+            <button class="chip is-active">Администратор</button>
+            <button class="chip">Просмотр</button>
+            <button class="chip">Инкассатор</button>
+            <button class="chip">Создание задач</button>
+            <button class="chip">Модерация задач</button>
+            <button class="chip">Просмотр задач</button>
+          </div>
+        </div>
+        <div class="access-obj" style="margin-top:var(--sp-3)">
+          <div class="access-obj-name"><b>Водный</b><span class="subtle">объект</span></div>
+          <div class="chips" data-chip-group="multi">
+            <button class="chip">Администратор</button>
+            <button class="chip is-active">Просмотр</button>
+            <button class="chip">Инкассатор</button>
+            <button class="chip">Создание задач</button>
+            <button class="chip">Модерация задач</button>
+            <button class="chip is-active">Просмотр задач</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-danger btn-block" data-toast="Доступ отозван" data-toast-action="Вернуть"><i data-lucide="x-circle"></i>Отозвать доступ</button>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Права сохранены" data-close-after>Сохранить</button>
+  </div>
+</aside>
+</body>
+</html>

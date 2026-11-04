@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BeInTeam — макеты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    .hub { max-width: 1200px; margin: 0 auto; padding: 56px 24px 80px; }
+    .hub-hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: end; margin-bottom: 48px; }
+    .hub-hero h1 { font-size: 56px; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1; }
+    .hub-hero .bar { width: 80px; height: 6px; background: var(--accent); margin: 20px 0; }
+    .hub-hero p { color: var(--text-2); font-size: 16px; max-width: 520px; }
+    .principles { background: var(--surface-inverse); color: var(--text-inverse); border-radius: var(--r-lg); padding: 24px; display: grid; gap: 14px; }
+    .principles div { display: flex; gap: 12px; font-size: 14px; }
+    .principles [data-lucide] { color: var(--orange); }
+    .screens { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .screen { display: flex; flex-direction: column; gap: 8px; }
+    .screen .num { font-size: 12px; color: var(--accent-text); font-weight: 600; }
+    .screen h3 { font-size: 20px; }
+    .screen p { color: var(--text-2); font-size: 13px; }
+    .screen .drawers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 12px; }
+    .swatches { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+    .sw { border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+    .sw i { display: block; height: 64px; }
+    .sw div { padding: 8px 10px; font-size: 12px; }
+    .sw b { display: block; font-size: 13px; }
+    .demo-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .theme-btn { position: fixed; top: 16px; right: 16px; }
+    @media (max-width: 900px) {
+      .hub-hero { grid-template-columns: 1fr; }
+      .hub-hero h1 { font-size: 38px; }
+      .screens { grid-template-columns: 1fr; }
+      .swatches { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+<button class="icon-btn theme-btn" data-action="theme" aria-label="Тема"><i data-lucide="sun-moon"></i></button>
+<div class="hub">
+
+  <section class="hub-hero">
+    <div>
+      <div class="overline">BeInTeam · дизайн-концепция v2 · ноябрь 2026</div>
+      <h1>Знакомая CRM.<br />Новый характер.</h1>
+      <div class="bar"></div>
+      <p>Статичные макеты нового интерфейса CRM для спортивных объектов. Основа для переноса на Angular: токены, компоненты и разметка совпадают с будущими компонентами.</p>
+    </div>
+    <div class="principles">
+      <div><i data-lucide="panel-right-open"></i><span><b>Боковые панели вместо модалок.</b> Бронь, заказ, клиент, оплата — справа, календарь и канбан остаются видны.</span></div>
+      <div><i data-lucide="layers"></i><span><b>Стек панелей.</b> Бронь → оплата → ссылка — без «модалки в модалке».</span></div>
+      <div><i data-lucide="undo-2"></i><span><b>Тост «Вернуть»</b> вместо «Вы уверены?». Удаление — inline-подтверждение.</span></div>
+      <div><i data-lucide="command"></i><span><b>Ctrl K</b> — поиск клиентов, заказов и быстрые действия.</span></div>
+      <div><i data-lucide="sun-moon"></i><span><b>Две темы.</b> Светлая основная, тёмная — та же семантика статусов.</span></div>
+    </div>
+  </section>
+
+  <div class="section-head"><h2>Экраны</h2><span class="subtle">Нажмите — откроется макет. Панели открываются кликом по карточкам, строкам, броням.</span></div>
+  <div class="screens">
+    <a class="card card-link screen" href="dashboard.html"><span class="num">01</span><h3>Сегодня</h3><p>Рабочий стол смены: ближайшие брони, что требует внимания, загрузка площадок, кассы.</p><div class="drawers"><span class="tag">Бронь</span><span class="tag">Оплата</span></div></a>
+    <a class="card card-link screen" href="schedule.html"><span class="num">02</span><h3>Расписание</h3><p>Неделя площадки, свободные слоты с ценой по тарифу, бронь в боковой панели. Эталон вёрстки.</p><div class="drawers"><span class="tag">Новая бронь</span><span class="tag">Бронь</span><span class="tag">Оплата</span><span class="tag">Изменить</span><span class="tag">События</span><span class="tag">Закрыть время</span></div></a>
+    <a class="card card-link screen" href="orders.html"><span class="num">03</span><h3>Заказы</h3><p>Канбан по статусам с перетаскиванием и список. Заказ с составом по месяцам и inline-правкой позиций.</p><div class="drawers"><span class="tag">Заказ</span><span class="tag">Оплата</span><span class="tag">Ссылка на оплату</span><span class="tag">Платежи</span><span class="tag">+ Бронь</span><span class="tag">+ Товар</span></div></a>
+    <a class="card card-link screen" href="clients.html"><span class="num">04</span><h3>Клиенты</h3><p>Таблица с фильтрами, карточка клиента: баланс, заказы, юр. лица, события.</p><div class="drawers"><span class="tag">Клиент</span><span class="tag">Редактирование</span><span class="tag">Юр. лицо</span><span class="tag">Новый клиент</span></div></a>
+    <a class="card card-link screen" href="tasks.html"><span class="num">05</span><h3>Задачи</h3><p>Список и доска задач смены и бара, прогресс чек-листа, комментарии.</p><div class="drawers"><span class="tag">Задача</span><span class="tag">Новая задача</span></div></a>
+    <a class="card card-link screen" href="objects.html"><span class="num">06</span><h3>Объекты</h3><p>Сеть объектов с загрузкой и площадками; настройки онлайн-брони и оплаты.</p><div class="drawers"><span class="tag">Настройки объекта</span></div></a>
+    <a class="card card-link screen" href="object.html"><span class="num">07</span><h3>Объект</h3><p>KPI объекта, кассы, смена и бар, площадки.</p><div class="drawers"><span class="tag">Операция кассы</span><span class="tag">Площадка</span></div></a>
+    <a class="card card-link screen" href="cashbox.html"><span class="num">08</span><h3>Касса</h3><p>Баланс, приход/расход, операции по дням. Баланс после операции — до подтверждения.</p><div class="drawers"><span class="tag">Доход</span><span class="tag">Расход</span><span class="tag">Операция</span></div></a>
+    <a class="card card-link screen" href="checklists.html"><span class="num">09</span><h3>Чек-листы</h3><p>Результаты смен и бара: финансы, фото, замечания. Таблица остаётся таблицей.</p><div class="drawers"><span class="tag">Результат</span></div></a>
+    <a class="card card-link screen" href="reports.html"><span class="num">10</span><h3>Отчёты</h3><p>Встроенные дашборды Superset в оформлении дизайн-системы.</p></a>
+    <a class="card card-link screen" href="settings.html"><span class="num">11</span><h3>Настройки</h3><p>Тарифы и периоды, правила тарифов, график работы, доступ сотрудников, интеграции.</p><div class="drawers"><span class="tag">Тариф</span><span class="tag">Правило</span><span class="tag">График</span><span class="tag">Доступ</span></div></a>
+    <a class="card card-link screen" href="login.html"><span class="num">12</span><h3>Вход</h3><p>Логин/пароль и Telegram, кобрендинг крупно.</p></a>
+  </div>
+
+  <div class="section-head"><h2>Палитра</h2><span class="subtle">assets/tokens.css</span></div>
+  <div class="swatches">
+    <div class="sw"><i style="background:var(--bone)"></i><div><b>Bone</b>фон</div></div>
+    <div class="sw"><i style="background:var(--black)"></i><div><b>Black</b>текст, сайдбар</div></div>
+    <div class="sw"><i style="background:var(--orange)"></i><div><b>Orange</b>только действие</div></div>
+    <div class="sw"><i style="background:var(--st-paid-bg);border-bottom:4px solid var(--st-paid)"></i><div><b>Оплачено</b>доход</div></div>
+    <div class="sw"><i style="background:var(--st-confirmed-bg);border-bottom:4px solid var(--st-confirmed)"></i><div><b>Подтверждено</b></div></div>
+    <div class="sw"><i style="background:var(--st-pending-bg);border-bottom:4px solid var(--st-pending)"></i><div><b>Ожидает</b>новое, в работе</div></div>
+  </div>
+
+  <div class="section-head"><h2>Компоненты</h2><span class="subtle">assets/app.css</span></div>
+  <div class="card" style="display:grid;gap:20px">
+    <div class="demo-row">
+      <button class="btn btn-primary"><i data-lucide="plus"></i>Новая бронь</button>
+      <button class="btn">Вторичная</button>
+      <button class="btn btn-dark">Тёмная</button>
+      <button class="btn btn-ghost">Призрачная</button>
+      <button class="btn btn-danger">Удалить</button>
+      <button class="btn btn-sm">Маленькая</button>
+      <button class="btn btn-icon" aria-label="Фильтры"><i data-lucide="sliders-horizontal"></i></button>
+    </div>
+    <div class="demo-row">
+      <span class="badge">Черновик</span><span class="badge badge-pending">Новый</span><span class="badge badge-info">Перезвонить</span>
+      <span class="badge badge-pending">Ожидает предоплаты</span><span class="badge badge-confirmed">Подтверждён</span>
+      <span class="badge badge-paid">Оплачен</span><span class="badge badge-error">Отменён</span>
+      <span class="tag">Сайт</span><span class="amount-plus">+3 750 ₽</span><span class="amount-minus">−1 000 ₽</span>
+    </div>
+    <div class="demo-row">
+      <div class="seg"><button>День</button><button class="is-active">Неделя</button><button>Площадки</button></div>
+      <div data-chip-group><button class="chip is-active">Все</button> <button class="chip">Частные</button> <button class="chip">Юр. лица</button></div>
+      <label class="switch"><input type="checkbox" checked /> Уведомления клиенту</label>
+      <label class="check"><input type="checkbox" checked /> Повторять каждую неделю</label>
+    </div>
+    <div class="form-grid" style="max-width:640px">
+      <div class="field"><label>Клиент</label><div class="input-wrap"><i data-lucide="search" class="ico-sm"></i><input class="input" placeholder="Имя или телефон" /></div></div>
+      <div class="field is-invalid"><label>E-mail</label><input class="input" value="client@" /><span class="error-text">Некорректный e-mail</span></div>
+    </div>
+    <div class="demo-row">
+      <button class="btn" data-toast="Бронь отменена" data-toast-action="Вернуть">Показать тост</button>
+      <button class="btn" data-action="cmdk"><i data-lucide="search"></i>Открыть Ctrl K</button>
+      <button class="btn" data-drawer="drawer-demo"><i data-lucide="panel-right-open"></i>Открыть панель</button>
+    </div>
+  </div>
+
+  <div class="section-head"><h2>Документы</h2></div>
+  <div class="grid grid-3">
+    <a class="card card-link" href="docs/"><h3 style="font-size:17px">README.md</h3><p class="muted" style="margin-top:6px">С чего начать: что сделано, как смотреть, порядок чтения.</p></a>
+    <a class="card card-link" href="docs/01-audit.html"><h3 style="font-size:17px">01-audit.md</h3><p class="muted" style="margin-top:6px">Аудит модалок текущего UI, сущности и статусы API, карта панелей.</p></a>
+    <a class="card card-link" href="docs/02-design-system.html"><h3 style="font-size:17px">02-design-system.md</h3><p class="muted" style="margin-top:6px">Токены, типографика, статусы и их коды, тёмная тема.</p></a>
+    <a class="card card-link" href="docs/03-ux-patterns.html"><h3 style="font-size:17px">03-ux-patterns.md</h3><p class="muted" style="margin-top:6px">Боковые панели и стек, подтверждения, формы, адаптив, a11y.</p></a>
+    <a class="card card-link" href="docs/04-screens.html"><h3 style="font-size:17px">04-screens.md</h3><p class="muted" style="margin-top:6px">Опись экранов: блоки, панели, поля, эндпоинты API.</p></a>
+    <a class="card card-link" href="docs/05-angular.html"><h3 style="font-size:17px">05-angular.md</h3><p class="muted" style="margin-top:6px">Перенос на Angular 21 и соответствие для других фреймворков.</p></a>
+    <a class="card card-link" href="docs/06-markup-rules.html"><h3 style="font-size:17px">06-markup-rules.md</h3><p class="muted" style="margin-top:6px">Правила вёрстки макетов, атрибуты поведения, чек-лист.</p></a>
+    <a class="card card-link" href="docs/07-components.html"><h3 style="font-size:17px">07-components.md</h3><p class="muted" style="margin-top:6px">Карта «класс → компонент», кандидаты в общие компоненты.</p></a>
+    <a class="card card-link" href="docs/08-attention.html"><h3 style="font-size:17px">08-attention.md</h3><p class="muted" style="margin-top:6px">На что обратить внимание: упрощения, ловушки, открытые вопросы.</p></a>
+  </div>
+</div>
+
+<aside class="drawer" id="drawer-demo" aria-label="Пример панели">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Пример</div><h2>Боковая панель</h2><div class="drawer-sub"><span class="badge badge-confirmed">Подтверждён</span></div></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <p class="muted">Панель не перекрывает страницу на широком экране, закрывается по Esc. Из неё можно открыть следующую поверх.</p>
+    <button class="btn btn-block" data-drawer="drawer-demo-2">Открыть вторую панель</button>
+  </div>
+  <div class="drawer-foot"><button class="btn" data-drawer-close>Отмена</button><button class="btn btn-primary" data-toast="Сохранено" data-close-after>Сохранить</button></div>
+</aside>
+<aside class="drawer" id="drawer-demo-2" aria-label="Вторая панель">
+  <div class="drawer-head"><div class="grow"><h2>Вторая панель</h2></div><button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button></div>
+  <div class="drawer-body"><p class="muted">Первая панель осталась под ней — закройте эту, и вы вернётесь назад.</p></div>
+</aside>
+</body>
+</html>

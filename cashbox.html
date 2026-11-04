@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Кассы — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Переключатель касс объекта */
+    .cash-switch { align-items: center; }
+    .cash-switch .obj-select { width: 240px; }
+
+    /* Баланс кассы: hero с тремя колонками справа */
+    .cash-hero .hero-col { min-width: 150px; }
+    .cash-hero .hero-col .val { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.1; margin-top: var(--sp-2); color: var(--text-inverse); white-space: nowrap; }
+    .cash-hero .hero-col small { display: block; margin-top: 4px; color: var(--text-3); font-size: var(--fs-xs); }
+
+    /* Сумма — крупный инпут в панели операции */
+    .amount-input { height: 64px; font-family: var(--font-display); font-weight: 700; font-size: 28px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; padding-right: 48px; }
+    .amount-wrap .suffix { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--text-2); }
+    .amount-wrap { position: relative; display: flex; align-items: center; }
+    .amount-wrap .suffix { position: absolute; right: 14px; }
+
+    /* Разделители дней в таблице операций */
+    .table tbody tr.day-sep { cursor: default; }
+    .table tbody tr.day-sep:hover { background: none; }
+    .table tbody tr.day-sep td { background: var(--surface-2); padding: 8px var(--sp-4); font-size: var(--fs-xs); font-weight: 600; color: var(--text-2); }
+    .day-sep .day-total { margin-left: var(--sp-2); font-weight: 500; color: var(--text-3); }
+    .day-sep .day-total b { font-weight: 600; }
+
+    /* Блок подтверждения удаления (вместо confirm()) */
+    .danger-zone { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .confirm-box { background: var(--st-error-bg); color: var(--text); border-radius: var(--r-md); padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+    .confirm-box p { font-size: var(--fs-sm); }
+    .confirm-box .actions { display: flex; gap: var(--sp-2); }
+    .btn-solid-danger { background: var(--st-error); border-color: var(--st-error); color: var(--surface); }
+    .btn-solid-danger:hover { background: var(--st-error); border-color: var(--st-error); opacity: 0.9; }
+    .drawer-foot .btn-icon { flex: none; }
+
+    /* Мобильный: строки-разделители дней на всю ширину карточки */
+    @media (max-width: 767px) {
+      .table-wrap.stack-mobile .table tr.day-sep { grid-template-columns: 1fr; }
+      .table-wrap.stack-mobile .table tr.day-sep td { grid-column: 1 / -1; padding: 8px 16px; border: 0; }
+      .cash-switch .obj-select { width: 100%; }
+    }
+  </style>
+</head>
+<body data-page="cashbox" data-crumbs="Campus Sport|Авиамоторная|Касса «Наличные»">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Касса «Наличные»</h1>
+        </div>
+        <div class="actions">
+          <button class="btn" data-drawer="drawer-expense"><i data-lucide="minus"></i>Записать расход</button>
+          <button class="btn btn-primary" data-drawer="drawer-income"><i data-lucide="plus"></i>Записать доход</button>
+        </div>
+      </div>
+
+      <!-- Кассы объекта: переключатель + выбор объекта -->
+      <div class="toolbar cash-switch">
+        <select class="select obj-select" aria-label="Объект">
+          <option>Авиамоторная</option>
+          <option>Авиамоторная 2</option>
+          <option>Белорусская</option>
+          <option>Беляево</option>
+        </select>
+        <div class="chip-group" data-chip-group style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+          <button class="chip is-active">Наличные <span class="count">32 500 ₽</span></button>
+          <button class="chip">Перевод на карту <span class="count">313 450 ₽</span></button>
+          <button class="chip">Терминал <span class="count">11 881 215 ₽</span></button>
+          <button class="chip">QR <span class="count">114 850 ₽</span></button>
+        </div>
+      </div>
+
+      <!-- Баланс и движение за месяц -->
+      <div class="hero-money cash-hero">
+        <div>
+          <div class="overline">Баланс кассы</div>
+          <div class="big money">32 500 ₽</div>
+        </div>
+        <div class="hero-col">
+          <div class="overline">Приход за сентябрь</div>
+          <div class="val money">+186 250 ₽</div>
+        </div>
+        <div class="hero-col">
+          <div class="overline">Расход за сентябрь</div>
+          <div class="val money">−41 300 ₽</div>
+        </div>
+        <div class="hero-col">
+          <div class="overline">Последняя инкассация</div>
+          <div class="val money">120 000 ₽</div>
+          <small>15 сентября</small>
+        </div>
+      </div>
+
+      <div class="section-head"><h2>Операции</h2></div>
+
+      <div class="toolbar">
+        <div class="input-wrap grow">
+          <i data-lucide="search" class="ico-sm"></i>
+          <input class="input" placeholder="Поиск по комментарию или номеру заказа" aria-label="Поиск" />
+        </div>
+        <select class="select" style="width:180px" aria-label="Период">
+          <option>Сентябрь 2026</option>
+          <option>Август 2026</option>
+          <option>Июль 2026</option>
+          <option>Свой период</option>
+        </select>
+        <div class="chip-group" data-chip-group="multi" style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+          <button class="chip">Оплата заказа</button>
+          <button class="chip">Прочий доход</button>
+          <button class="chip">Инкассация</button>
+          <button class="chip">Прочий расход</button>
+          <button class="chip">Возврат</button>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-toast="Экспорт операций подготовлен"><i data-lucide="download"></i>Экспорт</button>
+      </div>
+
+      <div class="table-wrap stack-mobile">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Операция</th>
+              <th>Тип</th>
+              <th>Дата и время</th>
+              <th class="hide-mobile">Автор</th>
+              <th class="ta-r">Сумма</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="day-sep">
+              <td colspan="5">20 сентября, вс <span class="day-total">· итог <b class="amount-plus">+3 750 ₽</b></span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Оплата заказа</div><div class="cell-sub">Заказ <a href="orders.html#order" style="color:var(--accent-text)">#131651</a></div></td>
+              <td><span class="tag">Оплата заказа</span></td>
+              <td class="num">20 сен, 20:10</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-plus">+6 750 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Такси</div><div class="cell-sub">Расходы · Такси</div></td>
+              <td><span class="tag">Прочий расход</span></td>
+              <td class="num">20 сен, 18:42</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-minus">−1 000 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Ремонт сетки</div><div class="cell-sub">Расходы · Ремонт</div></td>
+              <td><span class="tag">Прочий расход</span></td>
+              <td class="num">20 сен, 12:30</td>
+              <td class="hide-mobile">Денис Р.</td>
+              <td class="ta-r"><span class="money amount-minus">−4 000 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Размен от клиента</div><div class="cell-sub">Пополнение кассы</div></td>
+              <td><span class="tag">Прочий доход</span></td>
+              <td class="num">20 сен, 09:15</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-plus">+2 000 ₽</span></td>
+            </tr>
+
+            <tr class="day-sep">
+              <td colspan="5">19 сентября, сб <span class="day-total">· итог <b class="amount-minus">−4 300 ₽</b></span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Оплата заказа</div><div class="cell-sub">Заказ <a href="orders.html#order" style="color:var(--accent-text)">#131588</a></div></td>
+              <td><span class="tag">Оплата заказа</span></td>
+              <td class="num">19 сен, 19:20</td>
+              <td class="hide-mobile">Денис Р.</td>
+              <td class="ta-r"><span class="money amount-plus">+6 750 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Оплата заказа</div><div class="cell-sub">Заказ <a href="orders.html#order" style="color:var(--accent-text)">#131590</a></div></td>
+              <td><span class="tag">Оплата заказа</span></td>
+              <td class="num">19 сен, 14:05</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-plus">+4 500 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Инкассация</div><div class="cell-sub">Передача в банк</div></td>
+              <td><span class="tag">Инкассация</span></td>
+              <td class="num">19 сен, 11:40</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-minus">−15 000 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Хозтовары</div><div class="cell-sub">Расходники · пакеты для мусора</div></td>
+              <td><span class="tag">Прочий расход</span></td>
+              <td class="num">19 сен, 09:00</td>
+              <td class="hide-mobile">Денис Р.</td>
+              <td class="ta-r"><span class="money amount-minus">−550 ₽</span></td>
+            </tr>
+
+            <tr class="day-sep">
+              <td colspan="5">18 сентября, пт <span class="day-total">· итог <b class="amount-plus">+14 050 ₽</b></span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Оплата заказа</div><div class="cell-sub">Заказ <a href="orders.html#order" style="color:var(--accent-text)">#131562</a></div></td>
+              <td><span class="tag">Оплата заказа</span></td>
+              <td class="num">18 сен, 21:30</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-plus">+9 000 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Возврат клиенту</div><div class="cell-sub">Отмена брони, частичный возврат</div></td>
+              <td><span class="tag">Возврат</span></td>
+              <td class="num">18 сен, 17:10</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-minus">−3 200 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Прочий доход</div><div class="cell-sub">Продажа мячей</div></td>
+              <td><span class="tag">Прочий доход</span></td>
+              <td class="num">18 сен, 15:45</td>
+              <td class="hide-mobile">Денис Р.</td>
+              <td class="ta-r"><span class="money amount-plus">+1 500 ₽</span></td>
+            </tr>
+            <tr data-drawer="drawer-tx">
+              <td><div class="cell-main">Оплата заказа</div><div class="cell-sub">Заказ <a href="orders.html#order" style="color:var(--accent-text)">#131549</a></div></td>
+              <td><span class="tag">Оплата заказа</span></td>
+              <td class="num">18 сен, 10:20</td>
+              <td class="hide-mobile">Вера А.</td>
+              <td class="ta-r"><span class="money amount-plus">+6 750 ₽</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-foot">
+          <span>Показано 12 из 58 операций</span>
+          <button class="btn btn-sm" data-toast="Загружено ещё 12 операций">Показать ещё</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: доход ============ -->
+<aside class="drawer" id="drawer-income" aria-label="Доход">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Касса «Наличные» · Авиамоторная</div>
+      <h2>Доход · Наличные</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="summary-box">
+      <div class="row"><span class="muted">Баланс кассы</span><b class="money">32 500 ₽</b></div>
+    </div>
+    <div class="field">
+      <label>Тип операции</label>
+      <select class="select">
+        <option>Прочий доход</option>
+        <option>Пополнение</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Категория</label>
+      <select class="select">
+        <option>Размен от клиента</option>
+        <option>Продажа товаров</option>
+        <option>Пополнение кассы</option>
+        <option>Прочее</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Сумма</label>
+      <div class="amount-wrap">
+        <input class="input amount-input" value="3 750" inputmode="numeric" aria-label="Сумма" />
+        <span class="suffix">₽</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Комментарий*</label>
+      <textarea class="textarea" placeholder="Например: размен для клиента на корте 2"></textarea>
+    </div>
+    <div class="summary-box">
+      <div class="row total"><span>Баланс после операции</span><span class="money">36 250 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Доход записан · баланс 36 250 ₽" data-close-after><i data-lucide="check"></i>Записать доход</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: расход ============ -->
+<aside class="drawer" id="drawer-expense" aria-label="Расход">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Касса «Наличные» · Авиамоторная</div>
+      <h2>Расход · Наличные</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="summary-box">
+      <div class="row"><span class="muted">Баланс кассы</span><b class="money">32 500 ₽</b></div>
+    </div>
+    <div class="field">
+      <label>Тип операции</label>
+      <select class="select">
+        <option>Инкассация</option>
+        <option>Прочий расход</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Категория</label>
+      <select class="select">
+        <option>Такси</option>
+        <option>Расходники</option>
+        <option>Ремонт</option>
+        <option>Хозтовары</option>
+      </select>
+    </div>
+    <div class="field is-invalid">
+      <label>Сумма</label>
+      <div class="amount-wrap">
+        <input class="input amount-input" value="40 000" inputmode="numeric" aria-label="Сумма" aria-invalid="true" />
+        <span class="suffix">₽</span>
+      </div>
+      <span class="error-text">Сумма больше баланса кассы (32 500 ₽)</span>
+    </div>
+    <div class="field">
+      <label>Комментарий*</label>
+      <textarea class="textarea" placeholder="Например: ремонт сетки на корте 1"></textarea>
+    </div>
+    <div class="summary-box">
+      <div class="row total"><span>Баланс после операции</span><span class="money amount-minus">−7 500 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" disabled><i data-lucide="check"></i>Записать расход</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: операция кассы ============ -->
+<aside class="drawer" id="drawer-tx" aria-label="Операция">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Прочий расход</div>
+      <h2>Такси</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-money amount-minus">−1 000 ₽</div>
+
+    <dl class="kv">
+      <dt>Касса</dt><dd>Наличные</dd>
+      <dt>Объект</dt><dd>Авиамоторная</dd>
+      <dt>Тип</dt><dd>Прочий расход</dd>
+      <dt>Категория</dt><dd>Такси</dd>
+      <dt>Дата</dt><dd class="num">20 сентября, 18:42</dd>
+      <dt>Автор</dt><dd>Вера Администратор</dd>
+      <dt>Комментарий</dt><dd>Такси до склада за мячами</dd>
+      <dt>Связанный заказ</dt><dd>—</dd>
+    </dl>
+
+    <div class="drawer-section danger-zone">
+      <div>
+        <button class="btn btn-danger" type="button"><i data-lucide="trash-2"></i>Удалить операцию</button>
+      </div>
+      <div class="confirm-box" role="alert">
+        <p>Операция будет удалена, баланс станет 33 500 ₽</p>
+        <div class="actions">
+          <button class="btn btn-sm btn-solid-danger" data-toast="Операция удалена" data-close-after>Удалить</button>
+          <button class="btn btn-sm">Отмена</button>
+        </div>
+      </div>
+      <p class="subtle" style="font-size:var(--fs-xs)">Операции по заказам удаляются из карточки заказа</p>
+    </div>
+  </div>
+</aside>
+</body>
+</html>

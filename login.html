@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Вход — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Вход: без каркаса .app. Две колонки на весь экран, на мобиле — шапка сверху */
+    .login { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+    .login-brand {
+      background: var(--surface-inverse); color: var(--text-inverse);
+      padding: var(--sp-10) var(--sp-10);
+      display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-8);
+      min-height: 100vh;
+    }
+    .login-logo { font-family: var(--font-display); font-weight: 700; font-size: 40px; letter-spacing: -0.02em; line-height: 1.05; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .login-slogan { margin: auto 0; }
+    .login-slogan h2 { font-family: var(--font-display); font-weight: 800; font-size: 44px; text-transform: uppercase; line-height: 1.02; letter-spacing: -0.01em; color: var(--text-inverse); }
+    .login-line { width: 80px; height: 6px; background: var(--accent); margin-top: var(--sp-6); border-radius: 2px; }
+    .login-foot { font-size: var(--fs-xs); color: var(--text-3); }
+
+    .login-form-wrap { display: grid; place-items: center; padding: var(--sp-10) var(--sp-6); background: var(--bg); }
+    .login-form { width: 380px; max-width: 100%; display: flex; flex-direction: column; gap: var(--sp-5); }
+    .login-form h1 { font-size: 30px; }
+    .login-sub { color: var(--text-2); margin-top: calc(var(--sp-2) * -1); }
+    .login-form .field { gap: 8px; }
+    .login-form .input-wrap > .input { padding-right: 44px; }
+    .pw-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; }
+    .login-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); }
+    .login-row a { color: var(--accent-text); font-weight: 500; }
+    .or { display: flex; align-items: center; gap: var(--sp-3); color: var(--text-3); font-size: var(--fs-xs); }
+    .or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+    @media (max-width: 767px) {
+      .login { grid-template-columns: 1fr; }
+      .login-brand { min-height: 0; padding: var(--sp-5) var(--sp-4); gap: var(--sp-4); }
+      .login-logo { font-size: 26px; gap: 8px; }
+      .login-slogan h2 { font-size: 22px; }
+      .login-line { width: 48px; height: 4px; margin-top: var(--sp-3); }
+      .login-foot { display: none; }
+      .login-form-wrap { padding: var(--sp-6) var(--sp-4) var(--sp-10); place-items: start center; }
+      .login-form { width: 100%; }
+      .login-form h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+<div class="login">
+  <section class="login-brand">
+    <div class="login-logo">
+      <span>BeInTeam</span>
+    </div>
+    <div class="login-slogan">
+      <h2>Знакомая CRM.<br />Новый характер.</h2>
+      <div class="login-line"></div>
+    </div>
+    <div class="login-foot">© 2026 BeInTeam</div>
+  </section>
+
+  <section class="login-form-wrap">
+    <div class="login-form">
+      <div>
+        <h1>Вход</h1>
+        <p class="login-sub">CRM для спортивных объектов</p>
+      </div>
+
+      <div class="field">
+        <label for="login">Логин</label>
+        <div class="input-wrap">
+          <i data-lucide="user" class="ico-sm"></i>
+          <input id="login" class="input" type="text" autocomplete="username" placeholder="Логин или e-mail" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Пароль</label>
+        <div class="input-wrap">
+          <i data-lucide="lock" class="ico-sm"></i>
+          <input id="password" class="input" type="password" autocomplete="current-password" placeholder="Пароль" />
+          <button type="button" class="icon-btn pw-toggle" aria-label="Показать пароль"><i data-lucide="eye" class="ico-sm"></i></button>
+        </div>
+      </div>
+
+      <div class="login-row">
+        <label class="check"><input type="checkbox" checked /> Запомнить меня</label>
+        <a href="#">Забыли пароль?</a>
+      </div>
+
+      <a class="btn btn-primary btn-block" href="dashboard.html">Войти</a>
+
+      <div class="or">или</div>
+
+      <button type="button" class="btn btn-block"><i data-lucide="send"></i>Войти через Telegram</button>
+    </div>
+  </section>
+</div>
+</body>
+</html>

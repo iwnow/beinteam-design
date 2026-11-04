@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Объекты — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Карточка объекта — целиком кликабельна: растянутая ссылка на названии,
+       кнопка ⋯ поднята поверх неё (z-index), поэтому открывает панель, а не переход. */
+    .obj-card { position: relative; display: flex; flex-direction: column; }
+    .obj-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-md); }
+    .obj-card.is-current::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 4px; background: var(--accent); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .obj-card .obj-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); }
+    .obj-card .obj-top > div:first-child { flex: 1; min-width: 0; }
+    .obj-card h3 { font-size: 20px; margin-top: 4px; }
+    .obj-card .obj-link::after { content: ''; position: absolute; inset: 0; border-radius: var(--r-lg); }
+    .obj-card .icon-btn { position: relative; z-index: 1; }
+    .obj-card .obj-addr { font-size: var(--fs-sm); margin-top: 4px; }
+    .obj-places { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: var(--fs-sm); }
+    .obj-places li { display: flex; align-items: center; gap: 10px; }
+    .obj-places li::before { content: ''; width: 6px; height: 6px; border-radius: 2px; background: var(--line-strong); flex: none; }
+    .obj-foot { margin-top: auto; padding-top: var(--sp-4); }
+    .obj-meta { font-size: var(--fs-sm); color: var(--text-2); margin-bottom: 8px; }
+    .obj-load { height: 4px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+    .obj-load > i { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+
+    .toolbar .select { width: auto; min-width: 200px; }
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .obj-table tbody tr { cursor: default; }
+    .obj-table .cell-main a:hover { color: var(--accent-text); }
+
+    .stack > * + * { margin-top: var(--sp-4); }
+    .req { color: var(--accent-text); }
+    .switch-row { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .cfg-list .list-row { align-items: center; }
+    .cfg-sw { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+
+    @media (max-width: 767px) {
+      .toolbar .select { width: 100%; }
+    }
+  </style>
+</head>
+<body data-page="objects" data-crumbs="Campus Sport|Все объекты">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Объекты</h1>
+          <p class="page-sub">21 объект · 38 площадок · загрузка сегодня 72%</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" data-drawer="drawer-object-edit"><i data-lucide="plus"></i>Добавить объект</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="input-wrap grow">
+          <i data-lucide="search"></i>
+          <input class="input" type="search" placeholder="Название или адрес" aria-label="Поиск по названию или адресу" />
+        </div>
+        <select class="select" aria-label="Вид спорта">
+          <option>Все виды спорта</option>
+          <option>Футбол</option>
+          <option>Мини-футбол</option>
+          <option>Баскетбол</option>
+          <option>Волейбол</option>
+          <option>Теннис</option>
+          <option>Стритбол</option>
+        </select>
+        <div class="chip-row" data-chip-group>
+          <button class="chip is-active">Все</button>
+          <button class="chip">Москва</button>
+          <button class="chip">Волгоград</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="seg" role="group" aria-label="Вид списка">
+          <button class="is-active" data-tab="grid"><i data-lucide="layout-grid" class="ico-sm"></i>Плитка</button>
+          <button data-tab="table"><i data-lucide="list" class="ico-sm"></i>Таблица</button>
+        </div>
+      </div>
+
+      <!-- Плитка -->
+      <div data-tab-panel="grid" class="is-active">
+        <div class="grid grid-3">
+
+          <article class="card card-link obj-card is-current">
+            <div class="obj-top">
+              <div>
+                <div class="overline">01</div>
+                <h3><a class="obj-link" href="object.html">Авиамоторная</a></h3>
+                <div class="muted obj-addr">Москва · м. Авиамоторная</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Футбольный манеж · 34 × 18 м</li>
+              <li>Мини-поле · 20 × 10 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 9 броней · загрузка 78%</div>
+              <div class="obj-load"><i style="width:78%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">02</div>
+                <h3><a class="obj-link" href="object.html">Авиамоторная 2</a></h3>
+                <div class="muted obj-addr">Москва · м. Авиамоторная</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Баскетбольный зал · 28 × 15 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 7 броней · загрузка 64%</div>
+              <div class="obj-load"><i style="width:64%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">03</div>
+                <h3><a class="obj-link" href="object.html">Белорусская</a></h3>
+                <div class="muted obj-addr">Москва · м. Белорусская</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Футбольный зал · 40 × 20 м</li>
+              <li>Теннисный корт · 24 × 11 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 8 броней · загрузка 71%</div>
+              <div class="obj-load"><i style="width:71%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">04</div>
+                <h3><a class="obj-link" href="object.html">Беляево</a></h3>
+                <div class="muted obj-addr">Москва · м. Беляево</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Мини-футбол · 40 × 20 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 5 броней · загрузка 52%</div>
+              <div class="obj-load"><i style="width:52%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">05</div>
+                <h3><a class="obj-link" href="object.html">Водный</a></h3>
+                <div class="muted obj-addr">Москва · м. Водный стадион</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Зал · 15 × 15 м</li>
+              <li>Волейбольная площадка · 18 × 9 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 6 броней · загрузка 58%</div>
+              <div class="obj-load"><i style="width:58%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">06</div>
+                <h3><a class="obj-link" href="object.html">Нагорная</a></h3>
+                <div class="muted obj-addr">Москва · м. Нагорная</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Футбольный манеж · 42 × 22 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 4 брони · загрузка 39%</div>
+              <div class="obj-load"><i style="width:39%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">07</div>
+                <h3><a class="obj-link" href="object.html">Кутузовский</a></h3>
+                <div class="muted obj-addr">Москва · Кутузовский проспект</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Теннисный корт · 24 × 11 м</li>
+              <li>Стритбол · 16 × 12 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 10 броней · загрузка 83%</div>
+              <div class="obj-load"><i style="width:83%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">08</div>
+                <h3><a class="obj-link" href="object.html">Синергия</a></h3>
+                <div class="muted obj-addr">Москва · м. Синергия</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Волейбольный зал · 18 × 9 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 3 брони · загрузка 31%</div>
+              <div class="obj-load"><i style="width:31%"></i></div>
+            </div>
+          </article>
+
+          <article class="card card-link obj-card">
+            <div class="obj-top">
+              <div>
+                <div class="overline">09</div>
+                <h3><a class="obj-link" href="object.html">Перово</a></h3>
+                <div class="muted obj-addr">Москва · м. Перово</div>
+              </div>
+              <button class="icon-btn" data-drawer="drawer-object-edit" aria-label="Настройки объекта"><i data-lucide="ellipsis"></i></button>
+            </div>
+            <div class="divider"></div>
+            <ul class="obj-places">
+              <li>Футбольный манеж · 30 × 15 м</li>
+              <li>Баскетбольный зал · 26 × 14 м</li>
+            </ul>
+            <div class="obj-foot">
+              <div class="obj-meta">Сегодня 6 броней · загрузка 66%</div>
+              <div class="obj-load"><i style="width:66%"></i></div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Таблица -->
+      <div data-tab-panel="table">
+        <div class="table-wrap stack-mobile obj-table">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Объект</th>
+                <th class="hide-mobile">Адрес</th>
+                <th class="ta-r">Площадок</th>
+                <th class="ta-r">Брони сегодня</th>
+                <th class="ta-r">Загрузка</th>
+                <th class="ta-r">Касса (нал.)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a class="cell-main" href="object.html">Авиамоторная</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Авиамоторная</td>
+                <td class="ta-r num">2</td>
+                <td class="ta-r num">9</td>
+                <td class="ta-r num">78%</td>
+                <td class="ta-r money">32 500&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Авиамоторная 2</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Авиамоторная</td>
+                <td class="ta-r num">1</td>
+                <td class="ta-r num">7</td>
+                <td class="ta-r num">64%</td>
+                <td class="ta-r money">18 200&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Белорусская</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Белорусская</td>
+                <td class="ta-r num">2</td>
+                <td class="ta-r num">8</td>
+                <td class="ta-r num">71%</td>
+                <td class="ta-r money">21 900&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Беляево</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Беляево</td>
+                <td class="ta-r num">1</td>
+                <td class="ta-r num">5</td>
+                <td class="ta-r num">52%</td>
+                <td class="ta-r money">9 400&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Водный</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Водный стадион</td>
+                <td class="ta-r num">2</td>
+                <td class="ta-r num">6</td>
+                <td class="ta-r num">58%</td>
+                <td class="ta-r money">12 300&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Нагорная</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Нагорная</td>
+                <td class="ta-r num">1</td>
+                <td class="ta-r num">4</td>
+                <td class="ta-r num">39%</td>
+                <td class="ta-r money">7 600&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Кутузовский</a></td>
+                <td class="hide-mobile cell-sub">Москва · Кутузовский проспект</td>
+                <td class="ta-r num">2</td>
+                <td class="ta-r num">10</td>
+                <td class="ta-r num">83%</td>
+                <td class="ta-r money">26 800&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Синергия</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Синергия</td>
+                <td class="ta-r num">1</td>
+                <td class="ta-r num">3</td>
+                <td class="ta-r num">31%</td>
+                <td class="ta-r money">4 100&nbsp;₽</td>
+              </tr>
+              <tr>
+                <td><a class="cell-main" href="object.html">Перово</a></td>
+                <td class="hide-mobile cell-sub">Москва · м. Перово</td>
+                <td class="ta-r num">2</td>
+                <td class="ta-r num">6</td>
+                <td class="ta-r num">66%</td>
+                <td class="ta-r money">15 700&nbsp;₽</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: настройки объекта ============ -->
+<aside class="drawer drawer-wide" id="drawer-object-edit" aria-label="Настройки объекта">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Объект</div>
+      <h2>Настройки объекта</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body" data-tabs-scope>
+    <div class="tabs">
+      <button class="is-active" data-tab="main">Основное</button>
+      <button data-tab="online">Онлайн-бронь</button>
+      <button data-tab="pay">Оплата</button>
+    </div>
+
+    <div data-tab-panel="main" class="stack is-active">
+      <div class="field">
+        <label>Название <span class="req">*</span></label>
+        <input class="input" value="Авиамоторная" />
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Город</label>
+          <select class="select"><option selected>Москва</option><option>Волгоград</option></select>
+        </div>
+        <div class="field">
+          <label>Район</label>
+          <input class="input" value="Соколиная гора" />
+        </div>
+        <div class="field span-2">
+          <label>Адрес</label>
+          <input class="input" value="Душинская ул., 7с1" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Метро</label>
+        <div class="chip-row" data-chip-group="multi">
+          <button class="chip is-active">Авиамоторная</button>
+          <button class="chip">Бауманская</button>
+          <button class="chip">Шоссе Энтузиастов</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Открыто с</label>
+          <input class="input" type="time" value="08:00" />
+        </div>
+        <div class="field">
+          <label>До</label>
+          <input class="input" type="time" value="23:00" />
+        </div>
+      </div>
+    </div>
+
+    <div data-tab-panel="online" class="stack">
+      <div class="switch-row">
+        <label class="switch"><input type="checkbox" checked /><span>Разрешить черновики заказов с сайта</span></label>
+      </div>
+      <div class="field">
+        <label>Предоплата по умолчанию, %</label>
+        <input class="input num" value="100" />
+      </div>
+      <div class="field">
+        <label>Окно запрета онлайн-брони</label>
+        <div class="form-grid">
+          <div class="field"><span class="hint">С</span><input class="input" type="time" value="22:00" /></div>
+          <div class="field"><span class="hint">По</span><input class="input" type="time" value="08:00" /></div>
+        </div>
+        <span class="hint">В это время клиенты с сайта не могут забронировать площадку. Брони из CRM окно не ограничивает.</span>
+      </div>
+    </div>
+
+    <div data-tab-panel="pay" class="stack">
+      <div class="field">
+        <label>ЮKassa, shop_id</label>
+        <input class="input num" placeholder="Например, 123456" />
+      </div>
+      <div class="switch-row">
+        <label class="switch"><input type="checkbox" checked /><span>Автосписание (capture)</span></label>
+        <label class="switch"><input type="checkbox" checked /><span>Чек 54-ФЗ</span></label>
+      </div>
+      <div class="field">
+        <label>Ставка НДС</label>
+        <select class="select">
+          <option selected>Без НДС</option>
+          <option>0%</option>
+          <option>5%</option>
+          <option>7%</option>
+          <option>10%</option>
+          <option>20%</option>
+          <option>22%</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Кассы объекта</label>
+        <div class="list cfg-list">
+          <div class="list-row">
+            <div class="grow"><div class="title">Наличные</div><div class="sub">Баланс 32 500 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" checked /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="grow"><div class="title">Перевод на карту</div><div class="sub">Баланс 313 450 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" checked /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="grow"><div class="title">Терминал</div><div class="sub">Баланс 11 881 215 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="grow"><div class="title">QR</div><div class="sub">Баланс 114 850 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Настройки объекта сохранены" data-close-after>Сохранить</button>
+  </div>
+</aside>
+</body>
+</html>

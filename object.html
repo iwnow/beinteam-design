@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Авиамоторная — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    .stack > * + * { margin-top: var(--sp-4); }
+    .shift-card { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .shift-card .card-head { margin-bottom: 0; }
+    .shift-card p { color: var(--text-2); }
+    .shift-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-top: auto; padding-top: var(--sp-2); }
+    .bar-hint { display: flex; align-items: flex-start; gap: 8px; font-size: var(--fs-sm); color: var(--text-2); }
+    .bar-hint [data-lucide] { width: 16px; height: 16px; margin-top: 2px; color: var(--text-3); }
+
+    /* Карточка кассы — целиком кликабельна: растянутая ссылка на названии,
+       кнопки «Доход/Расход» поднимаются поверх (z-index). */
+    .cash-card { position: relative; display: flex; flex-direction: column; gap: var(--sp-3); }
+    .cash-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-md); }
+    .cash-card .cash-name { font-size: var(--fs-h3); margin-top: 2px; }
+    .cash-card .cash-link::after { content: ''; position: absolute; inset: 0; border-radius: var(--r-lg); }
+    .cash-card .cash-sum { font-family: var(--font-display); font-weight: 700; font-size: 24px; letter-spacing: -0.02em; }
+    .cash-card .cash-btns { display: flex; gap: 8px; margin-top: auto; position: relative; z-index: 1; }
+
+    /* Карточка площадки */
+    .place-card { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .place-card h3 { font-size: 18px; }
+    .place-card .place-size { font-size: var(--fs-sm); color: var(--text-2); }
+    .place-card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .place-card .place-info { font-size: var(--fs-sm); color: var(--text-2); display: flex; flex-direction: column; gap: 4px; }
+    .place-card .place-info b { color: var(--text); font-weight: 600; }
+    .place-card .place-foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+    .place-card .place-foot .btn { flex: 1; }
+    .place-add { min-height: 180px; border: 1px dashed var(--line-strong); border-radius: var(--r-lg); background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-2); font-weight: 600; cursor: pointer; }
+    .place-add:hover { color: var(--text); border-color: var(--text-3); }
+
+    .seg-full { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    .seg-full button { height: 34px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sec-list { display: flex; flex-direction: column; gap: 8px; }
+    .cam-row { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+    .dropzone { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: var(--sp-6); border: 1px dashed var(--line-strong); border-radius: var(--r-lg); background: var(--surface-2); text-align: center; color: var(--text-2); font-size: var(--fs-sm); cursor: pointer; }
+    .dropzone:hover, .dropzone:focus-within { border-color: var(--accent); }
+    .dropzone [data-lucide] { width: 24px; height: 24px; color: var(--text-3); }
+    .req { color: var(--accent-text); }
+    .switch-row { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .cash-op-balance { display: flex; justify-content: space-between; align-items: center; }
+
+    @media (max-width: 767px) {
+      .form-grid-3, .cam-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-page="objects" data-crumbs="Campus Sport|Объекты|Авиамоторная">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Авиамоторная</h1>
+          <p class="page-sub">Москва, ул. Душинская, 7с1 · м. Авиамоторная · открыто 08:00–23:00</p>
+        </div>
+        <div class="actions">
+          <button class="btn" data-drawer="drawer-object-edit"><i data-lucide="settings"></i>Настройки</button>
+          <a class="btn btn-primary" href="schedule.html"><i data-lucide="calendar"></i>Расписание</a>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="grid grid-4">
+        <div class="stat">
+          <div class="stat-label">Брони сегодня</div>
+          <div class="stat-value num">9</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Загрузка</div>
+          <div class="stat-value num">78%</div>
+          <div class="stat-delta up">+6% к пн</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Выручка сегодня</div>
+          <div class="stat-value num">58 500&nbsp;₽</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Ожидают оплаты</div>
+          <div class="stat-value num">3</div>
+        </div>
+      </div>
+
+      <!-- Кассы -->
+      <div class="section-head">
+        <h2>Кассы</h2>
+        <a class="btn btn-ghost btn-sm" href="cashbox.html">Все операции<i data-lucide="arrow-right" class="ico-sm"></i></a>
+      </div>
+      <div class="grid grid-4">
+        <article class="card card-link cash-card">
+          <div>
+            <div class="overline">Касса</div>
+            <h3 class="cash-name"><a class="cash-link" href="cashbox.html">Наличные</a></h3>
+          </div>
+          <div class="cash-sum money">32 500&nbsp;₽</div>
+          <div class="cash-btns">
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="plus" class="ico-sm"></i>Доход</button>
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="minus" class="ico-sm"></i>Расход</button>
+          </div>
+        </article>
+        <article class="card card-link cash-card">
+          <div>
+            <div class="overline">Касса</div>
+            <h3 class="cash-name"><a class="cash-link" href="cashbox.html">Перевод на карту</a></h3>
+          </div>
+          <div class="cash-sum money">313 450&nbsp;₽</div>
+          <div class="cash-btns">
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="plus" class="ico-sm"></i>Доход</button>
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="minus" class="ico-sm"></i>Расход</button>
+          </div>
+        </article>
+        <article class="card card-link cash-card">
+          <div>
+            <div class="overline">Касса</div>
+            <h3 class="cash-name"><a class="cash-link" href="cashbox.html">Терминал</a></h3>
+          </div>
+          <div class="cash-sum money">11 881 215&nbsp;₽</div>
+          <div class="cash-btns">
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="plus" class="ico-sm"></i>Доход</button>
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="minus" class="ico-sm"></i>Расход</button>
+          </div>
+        </article>
+        <article class="card card-link cash-card">
+          <div>
+            <div class="overline">Касса</div>
+            <h3 class="cash-name"><a class="cash-link" href="cashbox.html">QR</a></h3>
+          </div>
+          <div class="cash-sum money">114 850&nbsp;₽</div>
+          <div class="cash-btns">
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="plus" class="ico-sm"></i>Доход</button>
+            <button class="btn btn-sm" data-drawer="drawer-cash-op"><i data-lucide="minus" class="ico-sm"></i>Расход</button>
+          </div>
+        </article>
+      </div>
+
+      <!-- Смена -->
+      <div class="section-head">
+        <h2>Смена и бар</h2>
+      </div>
+      <div class="grid grid-2">
+        <article class="card shift-card">
+          <div class="card-head">
+            <h3>Смена</h3>
+            <span class="badge badge-paid">Открыта</span>
+          </div>
+          <p>Смена открыта в 08:02 · Вера Администратор</p>
+          <div class="shift-actions">
+            <a class="btn btn-primary" href="tasks.html#task"><i data-lucide="lock"></i>Закрыть смену</a>
+            <a class="btn" href="checklists.html"><i data-lucide="clipboard-check"></i>Результаты</a>
+          </div>
+        </article>
+        <article class="card shift-card">
+          <div class="card-head">
+            <h3>Бар</h3>
+            <span class="badge">Закрыт</span>
+          </div>
+          <p>Смена бара на сегодня ещё не открыта.</p>
+          <div class="shift-actions">
+            <button class="btn" disabled><i data-lucide="play"></i>Открыть бар</button>
+          </div>
+          <div class="bar-hint"><i data-lucide="info"></i><span>Нельзя открыть, пока не закрыта смена бара за 20 сентября</span></div>
+        </article>
+      </div>
+
+      <!-- Площадки -->
+      <div class="section-head">
+        <h2>Площадки</h2>
+      </div>
+      <div class="grid grid-3">
+        <article class="card place-card">
+          <div>
+            <h3>Футбольный манеж</h3>
+            <div class="place-size">34 × 18 м</div>
+          </div>
+          <div class="tags"><span class="tag">Футбол</span><span class="tag">Мини-футбол</span></div>
+          <div class="place-info">
+            <div>Сегодня: <b>6 броней</b></div>
+            <div>Ближайшая: <b>17:00 Команда «Вектор»</b></div>
+          </div>
+          <div class="place-foot">
+            <a class="btn btn-sm" href="schedule.html"><i data-lucide="calendar" class="ico-sm"></i>Расписание</a>
+            <button class="icon-btn" data-drawer="drawer-place-edit" aria-label="Настройки площадки"><i data-lucide="ellipsis"></i></button>
+          </div>
+        </article>
+
+        <article class="card place-card">
+          <div>
+            <h3>Мини-поле</h3>
+            <div class="place-size">20 × 10 м</div>
+          </div>
+          <div class="tags"><span class="tag">Мини-футбол</span></div>
+          <div class="place-info">
+            <div>Сегодня: <b>3 брони</b></div>
+            <div>Ближайшая: <b>19:00 Школа «Старт»</b></div>
+          </div>
+          <div class="place-foot">
+            <a class="btn btn-sm" href="schedule.html"><i data-lucide="calendar" class="ico-sm"></i>Расписание</a>
+            <button class="icon-btn" data-drawer="drawer-place-edit" aria-label="Настройки площадки"><i data-lucide="ellipsis"></i></button>
+          </div>
+        </article>
+
+        <button class="place-add" data-drawer="drawer-place-edit"><i data-lucide="plus"></i>Добавить площадку</button>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<aside class="drawer drawer-wide" id="drawer-object-edit" aria-label="Настройки объекта">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Объект</div>
+      <h2>Настройки объекта</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body" data-tabs-scope>
+    <div class="tabs">
+      <button class="is-active" data-tab="main">Основное</button>
+      <button data-tab="online">Онлайн-бронь</button>
+      <button data-tab="pay">Оплата</button>
+    </div>
+
+    <div data-tab-panel="main" class="stack is-active">
+      <div class="field">
+        <label>Название <span class="req">*</span></label>
+        <input class="input" value="Авиамоторная" />
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Город</label>
+          <select class="select"><option selected>Москва</option><option>Волгоград</option></select>
+        </div>
+        <div class="field">
+          <label>Район</label>
+          <input class="input" value="Соколиная гора" />
+        </div>
+        <div class="field span-2">
+          <label>Адрес</label>
+          <input class="input" value="Душинская ул., 7с1" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Метро</label>
+        <div class="chip-row" data-chip-group="multi">
+          <button class="chip is-active">Авиамоторная</button>
+          <button class="chip">Бауманская</button>
+          <button class="chip">Шоссе Энтузиастов</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Открыто с</label>
+          <input class="input" type="time" value="08:00" />
+        </div>
+        <div class="field">
+          <label>До</label>
+          <input class="input" type="time" value="23:00" />
+        </div>
+      </div>
+    </div>
+
+    <div data-tab-panel="online" class="stack">
+      <div class="switch-row">
+        <label class="switch"><input type="checkbox" checked /><span>Разрешить черновики заказов с сайта</span></label>
+      </div>
+      <div class="field">
+        <label>Предоплата по умолчанию, %</label>
+        <input class="input num" value="100" />
+      </div>
+      <div class="field">
+        <label>Окно запрета онлайн-брони</label>
+        <div class="form-grid">
+          <div class="field"><span class="hint">С</span><input class="input" type="time" value="22:00" /></div>
+          <div class="field"><span class="hint">По</span><input class="input" type="time" value="08:00" /></div>
+        </div>
+        <span class="hint">В это время клиенты с сайта не могут забронировать площадку. Брони из CRM окно не ограничивает.</span>
+      </div>
+    </div>
+
+    <div data-tab-panel="pay" class="stack">
+      <div class="field">
+        <label>ЮKassa, shop_id</label>
+        <input class="input num" placeholder="Например, 123456" />
+      </div>
+      <div class="switch-row">
+        <label class="switch"><input type="checkbox" checked /><span>Автосписание (capture)</span></label>
+        <label class="switch"><input type="checkbox" checked /><span>Чек 54-ФЗ</span></label>
+      </div>
+      <div class="field">
+        <label>Ставка НДС</label>
+        <select class="select">
+          <option selected>Без НДС</option>
+          <option>0%</option>
+          <option>5%</option>
+          <option>7%</option>
+          <option>10%</option>
+          <option>20%</option>
+          <option>22%</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Кассы объекта</label>
+        <div class="list cfg-list">
+          <div class="list-row">
+            <div class="grow"><div class="title">Наличные</div><div class="sub">Баланс 32 500 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" checked /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="grow"><div class="title">Перевод на карту</div><div class="sub">Баланс 313 450 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" checked /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="grow"><div class="title">Терминал</div><div class="sub">Баланс 11 881 215 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+          <div class="list-row">
+            <div class="grow"><div class="title">QR</div><div class="sub">Баланс 114 850 ₽</div></div>
+            <div class="cfg-sw">
+              <label class="switch"><input type="checkbox" /><span>Скрыть</span></label>
+              <label class="switch"><input type="checkbox" /><span>Разрешить ручные операции</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Настройки объекта сохранены" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: площадка ============ -->
+<aside class="drawer" id="drawer-place-edit" aria-label="Площадка">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Авиамоторная</div>
+      <h2>Площадка</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body stack">
+    <div class="field">
+      <label>Название <span class="req">*</span></label>
+      <input class="input" value="Футбольный манеж" />
+    </div>
+    <div class="field">
+      <label>Размер, м</label>
+      <div class="form-grid-3">
+        <div class="input-wrap"><input class="input num" value="34" aria-label="Длина" /><span class="suffix">м</span></div>
+        <div class="input-wrap"><input class="input num" value="18" aria-label="Ширина" /><span class="suffix">м</span></div>
+        <div class="input-wrap"><input class="input num" value="12" aria-label="Высота" /><span class="suffix">м</span></div>
+      </div>
+      <span class="hint">Длина · ширина · высота</span>
+    </div>
+    <div class="field">
+      <label>Активности</label>
+      <div class="chip-row" data-chip-group="multi">
+        <button class="chip is-active">Футбол</button>
+        <button class="chip is-active">Мини-футбол</button>
+        <button class="chip">Баскетбол</button>
+        <button class="chip">Волейбол</button>
+        <button class="chip">Теннис</button>
+        <button class="chip">Стритбол</button>
+      </div>
+    </div>
+    <div class="switch-row">
+      <label class="switch"><input type="checkbox" checked /><span>Площадка делится на секции</span></label>
+    </div>
+    <div class="field">
+      <label>Секции</label>
+      <div class="sec-list">
+        <input class="input" value="Секция А" aria-label="Секция А" />
+        <input class="input" value="Секция Б" aria-label="Секция Б" />
+      </div>
+      <div><button class="btn btn-sm" data-toast="Секция добавлена"><i data-lucide="plus" class="ico-sm"></i>секция</button></div>
+    </div>
+    <div class="field">
+      <label>Камеры</label>
+      <div class="cam-row">
+        <input class="input" value="Вход" aria-label="Название камеры" />
+        <input class="input" value="https://cams.example.com/arena-1" aria-label="URL камеры" />
+      </div>
+      <div><button class="btn btn-sm" data-toast="Камера добавлена"><i data-lucide="plus" class="ico-sm"></i>камера</button></div>
+    </div>
+    <div class="field">
+      <label>Обложка</label>
+      <label class="dropzone">
+        <i data-lucide="image-plus"></i>
+        <span>Перетащите фото сюда или <u>выберите файл</u></span>
+        <span class="subtle">JPG или PNG, до 5 МБ</span>
+        <input type="file" accept="image/*" class="sr-only" />
+      </label>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Площадка сохранена" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: операция по кассе ============ -->
+<aside class="drawer" id="drawer-cash-op" aria-label="Операция по кассе">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Авиамоторная</div>
+      <h2>Операция по кассе Наличные</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body stack">
+    <div class="seg seg-full">
+      <button>Доход</button>
+      <button class="is-active">Расход</button>
+    </div>
+    <div class="summary-box">
+      <div class="cash-op-balance"><span class="muted">Баланс кассы</span><b class="money">32 500&nbsp;₽</b></div>
+    </div>
+    <div class="field">
+      <label>Тип операции</label>
+      <select class="select">
+        <option>Прочий доход</option>
+        <option>Инкассация</option>
+        <option selected>Прочий расход</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Категория</label>
+      <select class="select">
+        <option selected>Такси</option>
+        <option>Расходники</option>
+        <option>Ремонт</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Сумма</label>
+      <div class="input-wrap"><input class="input num" value="1 000" /><span class="suffix">₽</span></div>
+    </div>
+    <div class="field">
+      <label>Комментарий <span class="req">*</span></label>
+      <textarea class="textarea" placeholder="Например, такси до поставщика"></textarea>
+    </div>
+    <div class="summary-box">
+      <div class="row total"><span>Баланс после операции</span><span class="money">31 500&nbsp;₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Расход 1 000 ₽ записан в кассу" data-close-after><i data-lucide="minus"></i>Записать расход</button>
+  </div>
+</aside>
+</body>
+</html>

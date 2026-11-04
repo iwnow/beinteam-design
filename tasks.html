@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Задачи — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Панель фильтров: селекты по содержимому, чипы переносятся */
+    .toolbar .select { width: auto; min-width: 180px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .who { display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+    .table td .cell-sub { display: block; margin-top: 2px; }
+    .table td.cell-due { white-space: nowrap; }
+    .table td.cell-updated { white-space: nowrap; color: var(--text-2); }
+    .table-foot .muted { font-size: var(--fs-sm); }
+
+    /* Канбан: карточки и колонки */
+    .kanban-card .kc-foot .who { font-size: var(--fs-sm); }
+    .kanban-card .kc-top .num { font-variant-numeric: tabular-nums; }
+    .kanban-col-head .badge { height: 22px; }
+
+    /* Панель задачи: сводка и прогресс чек-листа */
+    .drawer-sub .select { width: auto; min-width: 170px; height: var(--control-h-sm); }
+    .drawer-foot .btn { flex: 1; }
+    .prog-meta { display: flex; justify-content: space-between; font-size: var(--fs-sm); margin-bottom: 6px; }
+    .prog { height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+    .prog > i { display: block; height: 100%; background: var(--text); border-radius: inherit; }
+    .end-row { display: flex; justify-content: flex-end; margin-top: var(--sp-2); }
+    .empty-filter { margin-top: var(--sp-5); }
+
+    @media (max-width: 767px) {
+      .toolbar .select { flex: 1 1 140px; min-width: 0; }
+      .toolbar .input-wrap { flex-basis: 100%; }
+      .table-wrap.stack-mobile .table td.cell-main { font-size: var(--fs-body); }
+    }
+  </style>
+</head>
+<body data-page="tasks" data-crumbs="Campus Sport|Задачи">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Задачи</h1>
+          <p class="page-sub">Открыто 7 · в работе 3 · завершено сегодня 1</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" data-drawer="drawer-task-new"><i data-lucide="plus"></i>Новая задача</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="input-wrap grow">
+          <i data-lucide="search" class="ico-sm"></i>
+          <input class="input" placeholder="Поиск по задачам" aria-label="Поиск по задачам" />
+        </div>
+        <select class="select" aria-label="Объект">
+          <option>Все объекты</option><option>Авиамоторная</option><option>Авиамоторная 2</option><option>Водный</option>
+        </select>
+        <select class="select" aria-label="Процесс">
+          <option>Все процессы</option><option>Смена</option><option>Бар</option><option>Прочее</option>
+        </select>
+        <div class="chips" data-chip-group>
+          <button class="chip is-active">Все</button>
+          <button class="chip">Новые · 4</button>
+          <button class="chip">В работе · 3</button>
+          <button class="chip">Завершены</button>
+          <button class="chip">Отклонены</button>
+        </div>
+        <div class="seg" role="group" aria-label="Вид">
+          <button class="is-active" data-tab="list">Список</button>
+          <button data-tab="board">Доска</button>
+        </div>
+      </div>
+
+      <!-- Список -->
+      <div data-tab-panel="list" class="is-active">
+        <div class="table-wrap stack-mobile">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Задача</th>
+                <th>Статус</th>
+                <th>Исполнитель</th>
+                <th>Срок</th>
+                <th>Обновлено</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Открытие смены</div><div class="cell-sub">Авиамоторная · процесс Смена</div></td>
+                <td><span class="badge badge-pending">В работе</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ВА</span>Вера А.</span></td>
+                <td class="cell-due">21 сен, 09:00</td>
+                <td class="cell-updated hide-mobile">21 сен, 14:20</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Закрытие бара</div><div class="cell-sub">Авиамоторная · процесс Бар</div></td>
+                <td><span class="badge">Новая</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ИЛ</span>Игорь Л.</span></td>
+                <td class="cell-due">21 сен, 23:00</td>
+                <td class="cell-updated hide-mobile">21 сен, 08:10</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Инвентаризация мячей</div><div class="cell-sub">Авиамоторная 2 · процесс Прочее</div></td>
+                <td><span class="badge">Новая</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">МР</span>Марина Р.</span></td>
+                <td class="cell-due">22 сен, 18:00</td>
+                <td class="cell-updated hide-mobile">20 сен, 19:40</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Проверка сетки ворот</div><div class="cell-sub">Водный · процесс Прочее</div></td>
+                <td><span class="badge">Новая</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ДС</span>Дмитрий С.</span></td>
+                <td class="cell-due">23 сен, 12:00</td>
+                <td class="cell-updated hide-mobile">19 сен, 11:05</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Уборка манежа</div><div class="cell-sub">Авиамоторная · процесс Смена</div></td>
+                <td><span class="badge">Новая</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">МР</span>Марина Р.</span></td>
+                <td class="cell-due">21 сен, 22:00</td>
+                <td class="cell-updated hide-mobile">21 сен, 16:05</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Закрытие смены</div><div class="cell-sub">Авиамоторная · процесс Смена</div></td>
+                <td><span class="badge badge-pending">В работе</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ВА</span>Вера А.</span></td>
+                <td class="cell-due">21 сен, 23:00</td>
+                <td class="cell-updated hide-mobile">21 сен, 14:02</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Открытие бара</div><div class="cell-sub">Авиамоторная · процесс Бар</div></td>
+                <td><span class="badge badge-pending">В работе</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ИЛ</span>Игорь Л.</span></td>
+                <td class="cell-due">21 сен, 12:00</td>
+                <td class="cell-updated hide-mobile">21 сен, 13:40</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Закрытие бара</div><div class="cell-sub">Авиамоторная · процесс Бар</div></td>
+                <td><span class="badge badge-paid">Завершена</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ИЛ</span>Игорь Л.</span></td>
+                <td class="cell-due">20 сен, 23:00</td>
+                <td class="cell-updated hide-mobile">20 сен, 23:12</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Открытие смены</div><div class="cell-sub">Авиамоторная 2 · процесс Смена</div></td>
+                <td><span class="badge badge-paid">Завершена</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ОП</span>Ольга П.</span></td>
+                <td class="cell-due">21 сен, 09:00</td>
+                <td class="cell-updated hide-mobile">21 сен, 08:10</td>
+              </tr>
+              <tr data-drawer="drawer-task">
+                <td><div class="cell-main">Замена сетки</div><div class="cell-sub">Водный · процесс Прочее</div></td>
+                <td><span class="badge badge-error">Отклонена</span></td>
+                <td><span class="who"><span class="avatar avatar-sm">ДС</span>Дмитрий С.</span></td>
+                <td class="cell-due">20 сен, 18:00</td>
+                <td class="cell-updated hide-mobile">20 сен, 17:30</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot"><span>Показано 10 из 10</span><span class="muted">Нажмите на строку, чтобы открыть задачу</span></div>
+        </div>
+
+        <!-- Пустое состояние: показывается при фильтре «Отклонены», если отклонённых нет -->
+        <div class="empty empty-filter" id="tasks-empty" hidden>
+          <div class="empty-ico"><i data-lucide="inbox"></i></div>
+          <h3>Отклонённых задач нет</h3>
+          <p>Выберите другой статус или сбросьте фильтры.</p>
+        </div>
+      </div>
+
+      <!-- Доска -->
+      <div data-tab-panel="board">
+        <div class="kanban">
+          <div class="kanban-col">
+            <div class="kanban-col-head"><h3>Новая</h3><span class="badge">4</span></div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4813</span><span>до 23:00</span></div>
+              <div class="kc-title">Закрытие бара</div>
+              <div class="kc-sub">Авиамоторная · процесс Бар</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ИЛ</span>Игорь Л.</span></div>
+            </div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4814</span><span>до 22 сен</span></div>
+              <div class="kc-title">Инвентаризация мячей</div>
+              <div class="kc-sub">Авиамоторная 2 · процесс Прочее</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">МР</span>Марина Р.</span></div>
+            </div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4815</span><span>до 23 сен</span></div>
+              <div class="kc-title">Проверка сетки ворот</div>
+              <div class="kc-sub">Водный · процесс Прочее</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ДС</span>Дмитрий С.</span></div>
+            </div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4816</span><span>до 22:00</span></div>
+              <div class="kc-title">Уборка манежа</div>
+              <div class="kc-sub">Авиамоторная · процесс Смена</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">МР</span>Марина Р.</span></div>
+            </div>
+            <button class="kanban-add" data-drawer="drawer-task-new"><i data-lucide="plus" class="ico-sm"></i>Новая задача</button>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head"><h3>В работе</h3><span class="badge badge-pending">3</span></div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4812</span><span>до 09:00</span></div>
+              <div class="kc-title">Открытие смены</div>
+              <div class="kc-sub">Авиамоторная · процесс Смена</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ВА</span>Вера А.</span></div>
+            </div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4817</span><span>до 23:00</span></div>
+              <div class="kc-title">Закрытие смены</div>
+              <div class="kc-sub">Авиамоторная · процесс Смена</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ВА</span>Вера А.</span></div>
+            </div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4818</span><span>до 12:00</span></div>
+              <div class="kc-title">Открытие бара</div>
+              <div class="kc-sub">Авиамоторная · процесс Бар</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ИЛ</span>Игорь Л.</span></div>
+            </div>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head"><h3>Завершена</h3><span class="badge badge-paid">2</span></div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4820</span><span>20 сен</span></div>
+              <div class="kc-title">Закрытие бара</div>
+              <div class="kc-sub">Авиамоторная · процесс Бар</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ИЛ</span>Игорь Л.</span></div>
+            </div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4821</span><span>21 сен</span></div>
+              <div class="kc-title">Открытие смены</div>
+              <div class="kc-sub">Авиамоторная 2 · процесс Смена</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ОП</span>Ольга П.</span></div>
+            </div>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head"><h3>Отклонена</h3><span class="badge badge-error">1</span></div>
+            <div class="kanban-card" data-drawer="drawer-task">
+              <div class="kc-top"><span class="num">#4822</span><span>20 сен</span></div>
+              <div class="kc-title">Замена сетки</div>
+              <div class="kc-sub">Водный · процесс Прочее</div>
+              <div class="kc-foot"><span class="who"><span class="avatar avatar-sm">ДС</span>Дмитрий С.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: задача ============ -->
+<aside class="drawer drawer-wide" id="drawer-task" aria-label="Задача">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Задача #4812 · Авиамоторная</div>
+      <h2>Открытие смены</h2>
+      <div class="drawer-sub">
+        <select class="select" aria-label="Статус задачи">
+          <option>Новая</option><option selected>В работе</option><option>Завершена</option><option>Отклонена</option>
+        </select>
+        <span>создал Робот, 21 сен 08:00</span>
+      </div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <dl class="kv">
+      <dt>Объект</dt><dd>Авиамоторная</dd>
+      <dt>Процесс</dt><dd>Смена</dd>
+      <dt>Исполнитель</dt><dd>Вера Администратор</dd>
+      <dt>Срок</dt><dd>21 сен, 09:00</dd>
+      <dt>Создана</dt><dd>21 сен, 08:00 · Робот 1F</dd>
+      <dt>Обновлена</dt><dd>21 сен, 14:20</dd>
+    </dl>
+
+    <div class="drawer-section">
+      <h3>Описание</h3>
+      <p class="muted">Открыть смену: включить свет и проверить инвентарь на манеже, сверить остаток наличных с прошлой сменой, отметить неисправности в чек-листе.</p>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Чек-лист · Открытие смены</h3>
+      <div class="prog-meta"><span>12 из 18 пунктов</span><span class="muted">67%</span></div>
+      <div class="prog"><i style="width:67%"></i></div>
+      <a class="btn btn-dark btn-block" href="#" style="margin-top:var(--sp-4)"><i data-lucide="arrow-right"></i>Продолжить заполнение</a>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Итоги</h3>
+      <div class="summary-box">
+        <div class="row"><span class="muted">Остаток наличных</span><b class="money">13 500 ₽</b></div>
+        <div class="row"><span class="muted">Неисправности</span><span class="badge badge-error">1 · ворота</span></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Комментарии</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <span class="tl-dot"><i data-lucide="play"></i></span>
+          <div><div class="tl-text">Задача переведена в «В работе»</div><div class="tl-meta">Вера Администратор · 21 сен, 08:02</div></div>
+        </div>
+        <div class="tl-item">
+          <span class="tl-dot"><i data-lucide="message-square"></i></span>
+          <div><div class="tl-text">Манишки на манеж выданы, 2 комплекта.</div><div class="tl-meta">Вера Администратор · 21 сен, 08:40</div></div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:var(--sp-4)">
+        <textarea class="textarea" placeholder="Написать комментарий"></textarea>
+      </div>
+      <div class="end-row"><button class="btn btn-sm">Отправить</button></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn btn-danger" data-toast="Задача отклонена" data-toast-action="Вернуть"><i data-lucide="x-circle"></i>Отклонить</button>
+    <button class="btn btn-primary" data-toast="Задача завершена" data-close-after><i data-lucide="check"></i>Завершить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: новая задача ============ -->
+<aside class="drawer" id="drawer-task-new" aria-label="Новая задача">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Задачи</div>
+      <h2>Новая задача</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div class="field span-2">
+        <label>Название *</label>
+        <input class="input" autofocus placeholder="Например, «Проверка сетки ворот»" />
+      </div>
+      <div class="field span-2">
+        <label>Описание</label>
+        <textarea class="textarea" placeholder="Необязательно"></textarea>
+      </div>
+      <div class="field">
+        <label>Объект</label>
+        <select class="select">
+          <option>Авиамоторная</option><option>Авиамоторная 2</option><option>Водный</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Процесс</label>
+        <select class="select">
+          <option>Смена</option><option>Бар</option><option>Прочее</option>
+        </select>
+      </div>
+      <div class="field span-2">
+        <label>Чек-лист</label>
+        <select class="select">
+          <option>Открытие смены</option><option>Закрытие смены</option><option>Открытие бара</option><option>Закрытие бара</option><option>Без чек-листа</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Исполнитель</label>
+        <select class="select">
+          <option>Вера Администратор</option><option>Игорь Л.</option><option>Марина Р.</option><option>Дмитрий С.</option><option>Ольга П.</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Срок</label>
+        <input class="input" type="datetime-local" value="2026-09-22T09:00" />
+      </div>
+      <div class="field">
+        <label>Статус</label>
+        <select class="select">
+          <option selected>Новая</option><option>В работе</option><option>Завершена</option><option>Отклонена</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Задача создана" data-close-after><i data-lucide="check"></i>Создать</button>
+  </div>
+</aside>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Чек-листы — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Таблица результатов: горизонтальный скролл, первая колонка закреплена */
+    .ck-table-wrap { max-width: 100%; }
+    .ck-table { min-width: 1180px; }
+    .ck-table th, .ck-table td { white-space: nowrap; }
+    .ck-table th:first-child, .ck-table td:first-child {
+      position: sticky; left: 0; z-index: 2;
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      min-width: 280px; white-space: normal;
+    }
+    .ck-table th:first-child { z-index: 3; background: var(--surface-2); }
+    .ck-table tbody tr:hover td:first-child { background: var(--surface-2); }
+    .ck-table tbody tr.is-selected td:first-child { background: var(--accent-soft); }
+    .ck-table .cell-main { display: block; }
+    .ck-table .cell-sub { display: block; margin-top: 2px; }
+    .ck-table td.comment { white-space: normal; min-width: 220px; max-width: 260px; color: var(--text-2); font-size: var(--fs-sm); }
+    .ck-table td.num-cell { font-variant-numeric: tabular-nums; }
+    .ck-table tbody tr.day-sep { cursor: default; }
+    .ck-table tbody tr.day-sep:hover { background: none; }
+    .ck-table tbody tr.day-sep td { background: var(--surface-2); padding: 8px var(--sp-4); font-size: var(--fs-xs); font-weight: 600; color: var(--text-2); white-space: nowrap; }
+    .ck-table tbody tr.day-sep td:first-child { background: var(--surface-2); }
+    /* Миниатюры фото в таблице: 32×32 */
+    .thumb { width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--surface-3); border: 1px solid var(--line); display: inline-grid; place-items: center; color: var(--text-3); vertical-align: middle; }
+    .thumb [data-lucide] { width: 16px; height: 16px; }
+
+    /* Панель результата */
+    .ck-stats { margin-bottom: var(--sp-5); }
+    .ck-kv-card .card-head { margin-bottom: var(--sp-2); }
+    .ck-kv-card .card-head h3 { font-size: var(--fs-h3); }
+    .photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+    .photo-tile { aspect-ratio: 1 / 1; border-radius: var(--r-md); background: var(--surface-3); border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: var(--sp-2); gap: 6px; color: var(--text-3); font-size: var(--fs-xs); position: relative; }
+    .photo-tile [data-lucide] { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); width: 22px; height: 22px; }
+    .photo-tile span { color: var(--text-2); font-weight: 500; }
+    .drawer-foot .btn-icon { flex: none; }
+    .drawer-foot a.btn { text-align: center; }
+
+    @media (max-width: 767px) {
+      .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ck-table-wrap .ck-table { min-width: 1180px; }
+    }
+  </style>
+</head>
+<body data-page="checklists" data-crumbs="Campus Sport|Чек-листы">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Чек-листы</h1>
+          <p class="page-sub">Результаты смен и бара по всем объектам</p>
+        </div>
+        <div class="actions">
+          <button class="btn" data-toast="Файл Excel подготовлен"><i data-lucide="file-spreadsheet"></i>Экспорт в Excel</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Тип чек-листа">
+          <button class="is-active">Смена</button>
+          <button>Бар</button>
+        </div>
+        <select class="select" style="width:220px" aria-label="Объект">
+          <option>Все объекты</option>
+          <option>Авиамоторная</option>
+          <option>Авиамоторная 2</option>
+          <option>Белорусская</option>
+          <option>Беляево</option>
+          <option>Водный</option>
+          <option>Нагорная</option>
+          <option>Кутузовский</option>
+          <option>Синергия</option>
+          <option>Перово</option>
+          <option>Сокол</option>
+        </select>
+        <input class="input" type="date" value="2026-09-14" style="width:170px" aria-label="Дата с" />
+        <input class="input" type="date" value="2026-09-21" style="width:170px" aria-label="Дата по" />
+        <div class="chip-group" data-chip-group style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+          <button class="chip is-active">Все</button>
+          <button class="chip">С замечаниями</button>
+          <button class="chip">С расхождением кассы</button>
+        </div>
+      </div>
+
+      <div class="grid-4 ck-stats">
+        <div class="stat">
+          <div class="stat-label"><i data-lucide="clipboard-check" class="ico-sm"></i>Смен закрыто</div>
+          <div class="stat-value">21 из 21</div>
+          <div class="stat-delta up">все смены закрыты</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label"><i data-lucide="banknote" class="ico-sm"></i>Выручка нал.</div>
+          <div class="stat-value money">186 000 ₽</div>
+          <div class="stat-delta">за выбранный период</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label"><i data-lucide="scale" class="ico-sm"></i>Расхождения</div>
+          <div class="stat-value">2</div>
+          <div class="stat-delta down">Кутузовский −300 ₽, Сокол +150 ₽</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label"><i data-lucide="wrench" class="ico-sm"></i>Неисправности</div>
+          <div class="stat-value">3</div>
+          <div class="stat-delta">открыто задач: 3</div>
+        </div>
+      </div>
+
+      <div class="table-wrap ck-table-wrap">
+        <table class="table ck-table">
+          <thead>
+            <tr>
+              <th>Объект / чек-лист</th>
+              <th>Статус</th>
+              <th class="ta-r">Остаток наличных</th>
+              <th class="ta-r">Выручка наличными</th>
+              <th class="ta-r">Выручка безнал</th>
+              <th>Фото ресепшен</th>
+              <th>Фото площадки</th>
+              <th>Неисправности</th>
+              <th class="ta-r">Мячи</th>
+              <th class="ta-r">Манишки</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="day-sep">
+              <td colspan="11">21 сентября, пн · 4 смены</td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Кутузовский</span><span class="cell-sub">Открытие смены · 15:55 · Вера А.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">13 500 ₽</td>
+              <td class="ta-r money">8 000 ₽</td>
+              <td class="ta-r money">22 400 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="tag">Освещение</span></td>
+              <td class="ta-r num-cell">12</td>
+              <td class="ta-r num-cell">20</td>
+              <td class="comment">Расхождение −300 ₽, пересчитали дважды</td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Сокол</span><span class="cell-sub">Закрытие смены · 23:10 · Денис Р.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">9 200 ₽</td>
+              <td class="ta-r money">14 600 ₽</td>
+              <td class="ta-r money">31 000 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="subtle">—</span></td>
+              <td class="ta-r num-cell">14</td>
+              <td class="ta-r num-cell">22</td>
+              <td class="comment">Излишек +150 ₽ из-за сдачи клиенту</td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Авиамоторная</span><span class="cell-sub">Открытие бара · 17:20 · Анна К.</span></td>
+              <td><span class="badge badge-pending">В работе</span></td>
+              <td class="ta-r money">4 800 ₽</td>
+              <td class="ta-r"><span class="subtle">—</span></td>
+              <td class="ta-r"><span class="subtle">—</span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="subtle">—</span></td>
+              <td><span class="subtle">—</span></td>
+              <td class="ta-r"><span class="subtle">—</span></td>
+              <td class="ta-r"><span class="subtle">—</span></td>
+              <td class="comment"><span class="subtle">Не заполнены блоки бара</span></td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Водный</span><span class="cell-sub">Открытие смены · 09:40 · Мария Л.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">10 000 ₽</td>
+              <td class="ta-r money">3 750 ₽</td>
+              <td class="ta-r money">11 200 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="subtle">—</span></td>
+              <td class="ta-r num-cell">12</td>
+              <td class="ta-r num-cell">20</td>
+              <td class="comment"><span class="subtle">—</span></td>
+            </tr>
+
+            <tr class="day-sep">
+              <td colspan="11">20 сентября, вс · 4 смены</td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Беляево</span><span class="cell-sub">Закрытие бара · 01:05 · Игорь С.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">6 200 ₽</td>
+              <td class="ta-r money">9 400 ₽</td>
+              <td class="ta-r money">18 300 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="tag">Сетка</span></td>
+              <td class="ta-r num-cell">6</td>
+              <td class="ta-r num-cell">0</td>
+              <td class="comment">Порвана сетка за воротами</td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Нагорная</span><span class="cell-sub">Открытие смены · 10:05 · Сергей Т.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">11 000 ₽</td>
+              <td class="ta-r money">5 200 ₽</td>
+              <td class="ta-r money">14 800 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="subtle">—</span></td>
+              <td class="ta-r num-cell">12</td>
+              <td class="ta-r num-cell">20</td>
+              <td class="comment"><span class="subtle">—</span></td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Перово</span><span class="cell-sub">Открытие смены · 09:50 · Вера А.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">8 400 ₽</td>
+              <td class="ta-r money">6 100 ₽</td>
+              <td class="ta-r money">12 900 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="subtle">—</span></td>
+              <td class="ta-r num-cell">12</td>
+              <td class="ta-r num-cell">20</td>
+              <td class="comment"><span class="subtle">—</span></td>
+            </tr>
+            <tr data-drawer="drawer-result">
+              <td><span class="cell-main">Синергия</span><span class="cell-sub">Закрытие смены · 22:50 · Вера А.</span></td>
+              <td><span class="badge badge-paid">Завершена</span></td>
+              <td class="ta-r money">7 900 ₽</td>
+              <td class="ta-r money">4 600 ₽</td>
+              <td class="ta-r money">16 700 ₽</td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="thumb"><i data-lucide="image"></i></span></td>
+              <td><span class="tag">Замок</span></td>
+              <td class="ta-r num-cell">12</td>
+              <td class="ta-r num-cell">18</td>
+              <td class="comment">Замок раздевалки заедает</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: результат чек-листа ============ -->
+<aside class="drawer drawer-wide" id="drawer-result" aria-label="Результат чек-листа">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Чек-лист смены</div>
+      <h2>Кутузовский · Открытие смены</h2>
+      <div class="drawer-sub"><span class="badge badge-paid">Завершена</span><span>21 сентября · 15:55–16:20 · Вера Администратор</span></div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+
+    <div class="grid-2 grid">
+      <div class="stat">
+        <div class="stat-label">Остаток наличных</div>
+        <div class="stat-value money">13 500 ₽</div>
+        <div class="stat-delta down">по учёту 13 800 ₽ · −300 ₽</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Выручка наличными</div>
+        <div class="stat-value money">8 000 ₽</div>
+        <div class="stat-delta">за предыдущую смену 6 200 ₽</div>
+      </div>
+    </div>
+    <dl class="kv" style="margin-top:var(--sp-4)">
+      <dt>Выручка безнал</dt><dd class="money">22 400 ₽</dd>
+      <dt>Расхождение кассы</dt><dd class="money amount-minus">−300 ₽</dd>
+    </dl>
+
+    <div class="card ck-kv-card">
+      <div class="card-head"><h3>Ресепшен</h3></div>
+      <dl class="kv">
+        <dt>Уборка</dt><dd>Да</dd>
+        <dt>Неисправности</dt><dd>Нет</dd>
+      </dl>
+    </div>
+
+    <div class="card ck-kv-card">
+      <div class="card-head"><h3>Площадка</h3></div>
+      <dl class="kv">
+        <dt>Сетки целы</dt><dd>Да</dd>
+        <dt>Освещение</dt><dd><span class="badge badge-error">1 лампа не горит</span></dd>
+      </dl>
+    </div>
+
+    <div class="card ck-kv-card">
+      <div class="card-head"><h3>Раздевалки</h3></div>
+      <dl class="kv">
+        <dt>Уборка</dt><dd>Да</dd>
+        <dt>Замки исправны</dt><dd>Да</dd>
+      </dl>
+    </div>
+
+    <div class="card ck-kv-card">
+      <div class="card-head"><h3>Инвентарь</h3></div>
+      <dl class="kv">
+        <dt>Мячи</dt><dd class="num">12</dd>
+        <dt>Манишки</dt><dd class="num">20</dd>
+      </dl>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Фото</h3>
+      <div class="photo-grid">
+        <div class="photo-tile"><i data-lucide="image"></i><span>Ресепшен</span></div>
+        <div class="photo-tile"><i data-lucide="image"></i><span>Площадка</span></div>
+        <div class="photo-tile"><i data-lucide="image"></i><span>Раздевалки</span></div>
+        <div class="photo-tile"><i data-lucide="image"></i><span>Инвентарь</span></div>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn" data-toast="Задача создана по замечанию: Освещение на площадке"><i data-lucide="plus"></i>Создать задачу по замечанию</button>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn btn-icon" aria-label="Предыдущий результат"><i data-lucide="chevron-left"></i></button>
+    <button class="btn btn-icon" aria-label="Следующий результат"><i data-lucide="chevron-right"></i></button>
+    <a class="btn" href="tasks.html#task" style="flex:1"><i data-lucide="arrow-right"></i>Открыть задачу</a>
+  </div>
+</aside>
+</body>
+</html>

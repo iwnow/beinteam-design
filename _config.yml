@@ -1,0 +1,6 @@
+title: BeInTeam — новый дизайн CRM
+description: Статичные макеты и документация для переноса
+lang: ru
+exclude:
+  - README.md
+  - sync.sh

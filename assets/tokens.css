@@ -1,0 +1,156 @@
+/* ==========================================================================
+   BeInTeam — дизайн-токены
+   Источник: Beinteam_PATI_Design.pdf (палитра Bone / Black / Orange / Neutral,
+   Onest — заголовки, Golos Text — текст). Все цвета компонентов берутся
+   только отсюда: при переносе в Angular этот файл = styles/_tokens.scss.
+   ========================================================================== */
+
+:root {
+  /* --- Бренд --- */
+  --bone: #f7f5f0;
+  --black: #0b0b0b;
+  --orange: #ff5a00;
+  --neutral: #e8e5df;
+
+  /* --- Поверхности (светлая — основная) --- */
+  --bg: var(--bone);
+  --surface: #ffffff;
+  --surface-2: #f1eee8;          /* шапки таблиц, hover строк, подложки */
+  --surface-3: #e8e5df;          /* активный сегмент, выделение дня */
+  --surface-inverse: var(--black); /* баланс кассы, «Осталось оплатить» */
+  --overlay: rgba(11, 11, 11, 0.32);
+
+  /* --- Линии --- */
+  --line: #e8e5df;
+  --line-strong: #d6d1c7;
+  --focus: rgba(255, 90, 0, 0.35);
+
+  /* --- Текст --- */
+  --text: #0b0b0b;
+  --text-2: #5e5a54;
+  --text-3: #8c877f;
+  --text-inverse: #f7f5f0;
+
+  /* --- Акцент: оранжевый ведёт к действию. На оранжевом — чёрный текст --- */
+  --accent: var(--orange);
+  --accent-hover: #ff6f22;
+  --accent-press: #e85100;
+  --accent-soft: #ffe8da;
+  --accent-text: #c24500;         /* оранжевый текст на светлом фоне, AA */
+  --on-accent: #0b0b0b;
+
+  /* --- Статусы: цвет всегда дублируется текстом --- */
+  --st-paid: #1f6b45;      --st-paid-bg: #e6f1ea;      /* Оплачено / Завершена / доход */
+  --st-confirmed: #2f5a8a; --st-confirmed-bg: #e5edf6; /* Подтверждена */
+  --st-pending: #c24500;   --st-pending-bg: #ffe8da;   /* Ожидает оплаты / Новая / В работе */
+  --st-error: #b42318;     --st-error-bg: #fbe7e5;     /* Ошибка / Отменена / расход */
+  --st-neutral: #5e5a54;   --st-neutral-bg: #ece9e3;   /* Черновик / Архив */
+  --st-info: #6a4bc4;      --st-info-bg: #eee9fb;      /* Перезвонить / служебные */
+
+  /* --- Сайдбар всегда тёмный --- */
+  --side-bg: #0b0b0b;
+  --side-text: #c9c5bd;
+  --side-text-strong: #f7f5f0;
+  --side-muted: #77736c;
+  --side-line: #232323;
+  --side-hover: #1a1a1a;
+
+  /* --- Типографика --- */
+  --font-display: 'Onest', system-ui, sans-serif;
+  --font-text: 'Golos Text', system-ui, sans-serif;
+  --fs-display: 38px;   /* заголовок страницы, desktop */
+  --fs-h2: 22px;
+  --fs-h3: 17px;
+  --fs-body: 14px;
+  --fs-sm: 13px;
+  --fs-xs: 12px;
+  --fs-money-xl: 40px;
+  --lh-tight: 1.15;
+  --lh-body: 1.45;
+
+  /* --- Сетка, радиусы, тени --- */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(11, 11, 11, 0.04);
+  --shadow-md: 0 4px 16px rgba(11, 11, 11, 0.06);
+  --shadow-panel: -12px 0 40px rgba(11, 11, 11, 0.10);
+
+  --sidebar-w: 248px;
+  --sidebar-w-collapsed: 72px;
+  --topbar-h: 56px;
+  --drawer-w: 460px;
+  --control-h: 40px;
+  --control-h-sm: 32px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 180ms;
+
+  color-scheme: light;
+}
+
+/* --- Тёмная тема: та же структура и семантика статусов --- */
+:root[data-theme='dark'] {
+  --bg: #0b0b0b;
+  --surface: #151515;
+  --surface-2: #1c1c1c;
+  --surface-3: #2a2a2a;
+  --surface-inverse: #1f1f1f;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --line: #262626;
+  --line-strong: #353535;
+  --text: #f2f0eb;
+  --text-2: #b3aea6;
+  --text-3: #7d7870;
+  --text-inverse: #f7f5f0;
+  --accent-soft: #3a2316;
+  --accent-text: #ff8a4a;
+  --st-paid: #7fc59c;      --st-paid-bg: #1d2e24;
+  --st-confirmed: #8fb3dd; --st-confirmed-bg: #1e2836;
+  --st-pending: #ff9a5c;   --st-pending-bg: #3a2316;
+  --st-error: #f08a80;     --st-error-bg: #3a1d1b;
+  --st-neutral: #b3aea6;   --st-neutral-bg: #242424;
+  --st-info: #b9a6f0;      --st-info-bg: #2a2340;
+  --side-bg: #070707;
+  --shadow-panel: -12px 0 40px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b0b0b;
+    --surface: #151515;
+    --surface-2: #1c1c1c;
+    --surface-3: #2a2a2a;
+    --surface-inverse: #1f1f1f;
+    --overlay: rgba(0, 0, 0, 0.55);
+    --line: #262626;
+    --line-strong: #353535;
+    --text: #f2f0eb;
+    --text-2: #b3aea6;
+    --text-3: #7d7870;
+    --text-inverse: #f7f5f0;
+    --accent-soft: #3a2316;
+    --accent-text: #ff8a4a;
+    --st-paid: #7fc59c;      --st-paid-bg: #1d2e24;
+    --st-confirmed: #8fb3dd; --st-confirmed-bg: #1e2836;
+    --st-pending: #ff9a5c;   --st-pending-bg: #3a2316;
+    --st-error: #f08a80;     --st-error-bg: #3a1d1b;
+    --st-neutral: #b3aea6;   --st-neutral-bg: #242424;
+    --st-info: #b9a6f0;      --st-info-bg: #2a2340;
+    --side-bg: #070707;
+    --shadow-panel: -12px 0 40px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --fs-display: 30px;
+    --fs-money-xl: 32px;
+    --drawer-w: 100vw;
+  }
+}

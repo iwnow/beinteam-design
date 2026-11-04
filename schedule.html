@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Расписание — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Высота сетки: 08:00–23:00 = 15 часов. top = (час − 8) × --hour-h */
+    .sched { max-height: calc(100vh - 290px); min-height: 480px; }
+    .sched-body { height: calc(15 * var(--hour-h)); }
+    .place-picker { min-width: 280px; }
+    @media (max-width: 767px) { .sched { max-height: none; } }
+  </style>
+</head>
+<body data-page="schedule" data-crumbs="Campus Sport|Авиамоторная|Футбольный манеж 34 × 18">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Расписание</h1>
+          <p class="page-sub">Загрузка недели — 68% · свободно 41 ч · выручка по броням 412 500 ₽</p>
+        </div>
+        <div class="actions">
+          <button class="btn" data-drawer="drawer-block"><i data-lucide="ban"></i>Закрыть время</button>
+          <button class="btn btn-primary" data-drawer="drawer-new"><i data-lucide="plus"></i>Новая бронь</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Неделя">
+          <button aria-label="Назад"><i data-lucide="chevron-left" class="ico-sm"></i></button>
+          <button class="is-active">21–27 сентября 2026</button>
+          <button aria-label="Вперёд"><i data-lucide="chevron-right" class="ico-sm"></i></button>
+        </div>
+        <button class="btn btn-sm">Сегодня</button>
+        <div class="seg"><button>День</button><button class="is-active">Неделя</button><button>Площадки</button></div>
+        <div class="spacer"></div>
+        <select class="select place-picker" aria-label="Площадка">
+          <option>Авиамоторная · Футбольный манеж 34 × 18</option>
+          <option>Авиамоторная 2 · Баскетбольный зал</option>
+          <option>Водный · Зал 15 × 15</option>
+        </select>
+        <button class="btn btn-icon" aria-label="Фильтры"><i data-lucide="sliders-horizontal"></i></button>
+      </div>
+
+      <!-- Расписание недели. В Angular: <bi-schedule [days] [bookings] (slotClick) (bookingClick)> -->
+      <div class="sched" style="--cols:7">
+        <div class="sched-grid">
+          <div class="sched-head corner"></div>
+          <div class="sched-head is-today">Пн<span class="d">21</span></div>
+          <div class="sched-head">Вт<span class="d">22</span></div>
+          <div class="sched-head">Ср<span class="d">23</span></div>
+          <div class="sched-head">Чт<span class="d">24</span></div>
+          <div class="sched-head">Пт<span class="d">25</span></div>
+          <div class="sched-head">Сб<span class="d">26</span></div>
+          <div class="sched-head">Вс<span class="d">27</span></div>
+
+          <div class="sched-times sched-body">
+            <div class="sched-time"></div><div class="sched-time">09:00</div><div class="sched-time">10:00</div><div class="sched-time">11:00</div>
+            <div class="sched-time">12:00</div><div class="sched-time">13:00</div><div class="sched-time">14:00</div><div class="sched-time">15:00</div>
+            <div class="sched-time">16:00</div><div class="sched-time">17:00</div><div class="sched-time">18:00</div><div class="sched-time">19:00</div>
+            <div class="sched-time">20:00</div><div class="sched-time">21:00</div><div class="sched-time">22:00</div>
+          </div>
+
+          <!-- Пн 21 -->
+          <div class="sched-col sched-body is-today">
+            <div class="sched-slot-free" style="top:calc(1*var(--hour-h));height:var(--hour-h)" data-drawer="drawer-new"><i data-lucide="plus" class="ico-sm"></i>09:00 · 4 500 ₽</div>
+            <div class="ev ev-paid" style="top:calc(5*var(--hour-h));height:calc(1.5*var(--hour-h))" data-drawer="drawer-booking"><b>Школа «Старт»</b><span class="ev-meta">13:00–14:30 · Оплачено</span><div class="ev-price">6 750 ₽</div></div>
+            <div class="ev ev-pending is-selected" style="top:calc(9*var(--hour-h));height:var(--hour-h)" data-drawer="drawer-booking"><b>Команда «Вектор»</b><span class="ev-meta">17:00–18:00 · Ожидает</span><div class="ev-price">6 750 ₽</div></div>
+            <div class="now-line" style="top:calc(9.6*var(--hour-h))"></div>
+            <div class="ev ev-paid" style="top:calc(11*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Команда «Орбита»</b><span class="ev-meta">19:00–21:00 · Оплачено</span><div class="ev-price">13 500 ₽</div></div>
+          </div>
+          <!-- Вт 22 -->
+          <div class="sched-col sched-body">
+            <div class="ev ev-confirmed" style="top:calc(6*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Анна К.</b><span class="ev-meta">14:00–16:00 · Подтверждена</span><div class="ev-price">9 000 ₽</div></div>
+            <div class="sched-slot-free" style="top:calc(8*var(--hour-h));height:var(--hour-h)" data-drawer="drawer-new"><i data-lucide="plus" class="ico-sm"></i>16:00 · 6 750 ₽</div>
+            <div class="ev ev-paid" style="top:calc(10*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Школа «Старт»</b><span class="ev-meta">18:00–20:00 · Оплачено</span><div class="ev-price">13 500 ₽</div></div>
+          </div>
+          <!-- Ср 23 -->
+          <div class="sched-col sched-body">
+            <div class="ev ev-confirmed" style="top:calc(4*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Регулярная бронь</b><span class="ev-meta">12:00–14:00 · каждую среду</span><div class="ev-price">9 000 ₽</div></div>
+            <div class="ev ev-paid" style="top:calc(8*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Команда «Вектор»</b><span class="ev-meta">16:00–18:00 · Оплачено</span><div class="ev-price">13 500 ₽</div></div>
+            <div class="ev ev-blocked" style="top:calc(12*var(--hour-h));height:calc(3*var(--hour-h))" data-drawer="drawer-block"><b>Техобслуживание</b><span class="ev-meta">20:00–23:00 · закрыто</span></div>
+          </div>
+          <!-- Чт 24 -->
+          <div class="sched-col sched-body">
+            <div class="ev ev-pending" style="top:calc(7*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Алексей М.</b><span class="ev-meta">15:00–17:00 · Ожидает</span><div class="ev-price">13 500 ₽</div></div>
+            <div class="ev ev-paid" style="top:calc(10*var(--hour-h));height:calc(1*var(--hour-h))" data-drawer="drawer-booking"><b>Тренировка ДЮСШ</b><span class="ev-meta">18:00–19:00</span><div class="ev-price">6 750 ₽</div></div>
+          </div>
+          <!-- Пт 25 -->
+          <div class="sched-col sched-body">
+            <div class="ev ev-paid" style="top:calc(5*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Тренировка</b><span class="ev-meta">13:00–15:00 · Оплачено</span><div class="ev-price">9 000 ₽</div></div>
+            <div class="ev ev-confirmed" style="top:calc(10*var(--hour-h));height:calc(3*var(--hour-h))" data-drawer="drawer-booking"><b>Команда «Орбита»</b><span class="ev-meta">18:00–21:00 · Подтверждена</span><div class="ev-price">20 250 ₽</div></div>
+          </div>
+          <!-- Сб 26 -->
+          <div class="sched-col sched-body">
+            <div class="ev ev-paid" style="top:calc(2*var(--hour-h));height:calc(4*var(--hour-h))" data-drawer="drawer-booking"><b>Турнир выходного дня</b><span class="ev-meta">10:00–14:00 · Оплачено</span><div class="ev-price">32 000 ₽</div></div>
+            <div class="ev ev-confirmed" style="top:calc(7*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>День рождения</b><span class="ev-meta">15:00–17:00</span><div class="ev-price">13 500 ₽</div></div>
+          </div>
+          <!-- Вс 27 -->
+          <div class="sched-col sched-body">
+            <div class="ev ev-pending" style="top:calc(8*var(--hour-h));height:calc(2*var(--hour-h))" data-drawer="drawer-booking"><b>Школа «Старт»</b><span class="ev-meta">16:00–18:00 · Ожидает</span><div class="ev-price">13 500 ₽</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:var(--st-paid)"></i>Оплачено</span>
+        <span><i style="background:var(--st-confirmed)"></i>Подтверждена</span>
+        <span><i style="background:var(--st-pending)"></i>Ожидает оплаты</span>
+        <span><i style="background:var(--line-strong)"></i>Закрыто</span>
+        <span class="subtle">Нажмите на свободное время, чтобы создать бронь · Ctrl K — поиск</span>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: бронь (просмотр) ============ -->
+<aside class="drawer" id="drawer-booking" aria-label="Бронь">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Бронь #245992</div>
+      <h2>Команда «Вектор»</h2>
+      <div class="drawer-sub"><span class="badge badge-pending">Ожидает оплаты</span><span>Пн, 21 сентября · 17:00–18:00</span></div>
+    </div>
+    <button class="icon-btn" data-menu="menu-booking" aria-label="Ещё"><i data-lucide="more-horizontal"></i></button>
+    <div class="menu" id="menu-booking" style="right:64px;top:56px">
+      <button data-drawer="drawer-events"><i data-lucide="history" class="ico-sm"></i>События</button>
+      <button data-toast="Бронь скопирована на следующую неделю"><i data-lucide="copy" class="ico-sm"></i>Повторить на неделю</button>
+      <button class="btn-danger" data-toast="Бронь отменена" data-toast-action="Вернуть"><i data-lucide="x-circle" class="ico-sm"></i>Отменить бронь</button>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+      <div><div class="overline">Стоимость брони</div><div class="drawer-money money">6 750 ₽</div></div>
+      <div class="field" style="min-width:200px">
+        <label>Статус заказа</label>
+        <select class="select" aria-label="Статус заказа">
+          <option>Новый</option><option>Перезвонить</option><option>Ожидает подтверждения</option>
+          <option>Ожидает предоплаты</option><option selected>Подтверждён</option><option>Оплачен</option><option>Отменён</option>
+        </select>
+      </div>
+    </div>
+
+    <dl class="kv">
+      <dt>Площадка</dt><dd>Футбольный манеж 34 × 18</dd>
+      <dt>Объект</dt><dd>Авиамоторная</dd>
+      <dt>Активность</dt><dd>⚽ Футбол</dd>
+      <dt>Клиент</dt><dd><a href="#" data-drawer="drawer-client" style="color:var(--accent-text)">Команда «Вектор» →</a></dd>
+      <dt>Телефон</dt><dd class="num">+7 (900) 000-11-22</dd>
+      <dt>Источник</dt><dd><span class="tag">Сайт</span></dd>
+    </dl>
+
+    <div class="drawer-section">
+      <h3>Связанный заказ</h3>
+      <div class="summary-box">
+        <div class="row"><span class="muted">Заказ #120461 · 115 броней</span><span class="badge badge-confirmed">Подтверждён</span></div>
+        <div class="row"><span class="muted">Стоимость заказа</span><b class="money">802 500 ₽</b></div>
+        <div class="row"><span class="muted">Оплачено</span><b class="money amount-minus">0 ₽</b></div>
+      </div>
+      <button class="btn btn-block" style="margin-top:8px" data-drawer="drawer-order"><i data-lucide="arrow-right"></i>Открыть заказ</button>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Комментарий</h3>
+      <textarea class="textarea" placeholder="Видно всем администраторам объекта">Нужны манишки, 2 комплекта</textarea>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer="drawer-edit"><i data-lucide="pencil"></i>Изменить</button>
+    <button class="btn btn-primary" data-drawer="drawer-pay"><i data-lucide="credit-card"></i>Оплатить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: новая бронь ============ -->
+<aside class="drawer" id="drawer-new" aria-label="Новая бронь">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Авиамоторная · Футбольный манеж</div>
+      <h2>Новая бронь</h2>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Клиент</label>
+      <div class="input-wrap"><i data-lucide="search" class="ico-sm"></i><input class="input" placeholder="Имя, телефон или компания" value="Команда «Вектор»" /></div>
+      <span class="hint">Нет в базе? <a href="#" data-drawer="drawer-client-new" style="color:var(--accent-text)">Создать клиента</a></span>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Дата</label><input class="input" type="date" value="2026-09-22" /></div>
+      <div class="field"><label>Активность</label><select class="select"><option>Футбол</option><option>Мини-футбол</option><option>Баскетбол</option></select></div>
+    </div>
+    <div class="field">
+      <label>Время · цена по тарифу «Будни вечер»</label>
+      <div class="slot-pick">
+        <button disabled>14:00<small>занято</small></button>
+        <button disabled>15:00<small>занято</small></button>
+        <button class="is-active">16:00<small>6 750 ₽</small></button>
+        <button class="is-active">17:00<small>6 750 ₽</small></button>
+        <button disabled>18:00<small>занято</small></button>
+        <button disabled>19:00<small>занято</small></button>
+        <button>20:00<small>6 750 ₽</small></button>
+        <button>21:00<small>5 500 ₽</small></button>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" /> Повторять каждую неделю до конца сезона</label>
+    <div class="field"><label>Заказ</label><select class="select"><option>Создать новый заказ</option><option>Добавить в заказ #120461 (Команда «Вектор»)</option></select></div>
+    <div class="field"><label>Комментарий</label><textarea class="textarea" placeholder="Необязательно"></textarea></div>
+    <div class="summary-box">
+      <div class="row"><span class="muted">Вт, 22 сентября · 16:00–18:00</span><span>2 ч</span></div>
+      <div class="row"><span class="muted">Тариф</span><span>6 750 ₽ / ч</span></div>
+      <div class="row total"><span>Итого</span><span class="money">13 500 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Бронь создана · заказ #131800" data-toast-action="Открыть" data-close-after><i data-lucide="check"></i>Забронировать</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: оплата брони (стек поверх брони) ============ -->
+<aside class="drawer" id="drawer-pay" aria-label="Оплата">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Бронь #245992 · заказ #120461</div><h2>Оплата</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Способ оплаты</label>
+      <div class="seg" style="width:100%;display:grid;grid-template-columns:repeat(4,1fr)">
+        <button class="is-active">Наличные</button><button>Терминал</button><button>QR</button><button>Ссылка</button>
+      </div>
+    </div>
+    <div class="field"><label>Касса</label><select class="select"><option>Наличные · Авиамоторная (32 500 ₽)</option><option>Терминал · Авиамоторная</option></select></div>
+    <div class="field"><label>Сумма</label><div class="input-wrap"><input class="input num" value="6 750" /><span class="suffix">₽</span></div></div>
+    <div class="summary-box">
+      <div class="row"><span class="muted">К оплате по брони</span><span class="money">6 750 ₽</span></div>
+      <div class="row"><span class="muted">Баланс кассы после</span><span class="money">39 250 ₽</span></div>
+      <div class="row total"><span>Остаток по заказу</span><span class="money">795 750 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Назад</button>
+    <button class="btn btn-primary" data-toast="Оплата 6 750 ₽ проведена" data-close-after>Провести 6 750 ₽</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: изменить бронь ============ -->
+<aside class="drawer" id="drawer-edit" aria-label="Изменить бронь">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Бронь #245992</div><h2>Изменить бронь</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field"><label>Площадка</label><select class="select"><option>Футбольный манеж 34 × 18</option><option>Мини-поле 20 × 10</option></select></div>
+    <div class="form-grid">
+      <div class="field"><label>Дата</label><input class="input" type="date" value="2026-09-21" /></div>
+      <div class="field"><label>Активность</label><select class="select"><option>Футбол</option></select></div>
+      <div class="field"><label>Начало</label><input class="input" type="time" value="17:00" /></div>
+      <div class="field"><label>Окончание</label><input class="input" type="time" value="18:00" /></div>
+    </div>
+    <div class="field"><label>Цена брони</label><div class="input-wrap"><input class="input num" value="6 750" /><span class="suffix">₽</span></div><span class="hint">По тарифу 6 750 ₽ — ручная цена отметится в событиях</span></div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Изменения сохранены" data-close-after>Сохранить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: события брони ============ -->
+<aside class="drawer" id="drawer-events" aria-label="События">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Бронь #245992</div><h2>События</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="timeline">
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="tl-text">Статус изменён: Новая → Подтверждена</div><div class="tl-meta">Вера Администратор · 20 сен, 18:42</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="message-circle"></i></span><div><div class="tl-text">Отправлено уведомление в WhatsApp</div><div class="tl-meta">Система · 20 сен, 18:42</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="plus"></i></span><div><div class="tl-text">Бронь создана с сайта</div><div class="tl-meta">Клиент · 20 сен, 17:05</div></div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ Панель: закрыть время ============ -->
+<aside class="drawer" id="drawer-block" aria-label="Закрыть время">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Футбольный манеж</div><h2>Закрыть время</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field"><label>Причина</label><select class="select"><option>Техобслуживание</option><option>Мероприятие объекта</option><option>Другое</option></select></div>
+    <div class="form-grid">
+      <div class="field"><label>Дата</label><input class="input" type="date" value="2026-09-23" /></div>
+      <div class="field"><label>Площадки</label><select class="select"><option>Только эта</option><option>Все площадки объекта</option></select></div>
+      <div class="field"><label>С</label><input class="input" type="time" value="20:00" /></div>
+      <div class="field"><label>До</label><input class="input" type="time" value="23:00" /></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-dark" data-toast="Время закрыто для бронирования" data-close-after>Закрыть время</button>
+  </div>
+</aside>
+
+<!-- Заглушки панелей других разделов: в приложении это те же компоненты, что на orders/clients -->
+<aside class="drawer" id="drawer-order" aria-label="Заказ">
+  <div class="drawer-head"><div class="grow"><div class="overline">Заказ</div><h2>#120461 · Команда «Вектор»</h2><div class="drawer-sub"><span class="badge badge-confirmed">Подтверждён</span></div></div><button class="icon-btn" data-drawer-close><i data-lucide="x"></i></button></div>
+  <div class="drawer-body"><div class="hero-money"><div><div class="overline">Осталось оплатить</div><div class="big money">802 500 ₽</div></div></div><p class="muted">Полная карточка заказа — на странице <a href="orders.html#order" style="color:var(--accent-text)">Заказы</a>.</p></div>
+</aside>
+<aside class="drawer" id="drawer-client" aria-label="Клиент">
+  <div class="drawer-head"><div class="grow"><div class="overline">Клиент</div><h2>Команда «Вектор»</h2><div class="drawer-sub"><span class="tag">Юридическое лицо</span></div></div><button class="icon-btn" data-drawer-close><i data-lucide="x"></i></button></div>
+  <div class="drawer-body"><p class="muted">Полная карточка клиента — на странице <a href="clients.html#client" style="color:var(--accent-text)">Клиенты</a>.</p></div>
+</aside>
+<aside class="drawer" id="drawer-client-new" aria-label="Новый клиент">
+  <div class="drawer-head"><div class="grow"><h2>Новый клиент</h2></div><button class="icon-btn" data-drawer-close><i data-lucide="x"></i></button></div>
+  <div class="drawer-body">
+    <div class="form-grid"><div class="field"><label>Имя</label><input class="input" /></div><div class="field"><label>Фамилия</label><input class="input" /></div></div>
+    <div class="field"><label>Телефон</label><input class="input" placeholder="+7 (___) ___-__-__" /></div>
+  </div>
+  <div class="drawer-foot"><button class="btn" data-drawer-close>Отмена</button><button class="btn btn-primary" data-toast="Клиент создан и выбран в брони" data-close-after>Создать</button></div>
+</aside>
+</body>
+</html>

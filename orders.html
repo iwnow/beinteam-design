@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Заказы — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Фильтры тулбара и статус в панели */
+    .ord-filter { width: auto; min-width: 170px; }
+    .ord-search { min-width: 240px; }
+    .ord-status-select { width: auto; min-width: 210px; height: 32px; font-size: var(--fs-sm); }
+
+    /* Канбан: подсказка, курсор перетаскивания, прогресс оплаты */
+    .kb-hint { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-2); margin-bottom: var(--sp-4); }
+    .kanban-card[draggable="true"] { cursor: grab; }
+    .kanban-card[draggable="true"]:active { cursor: grabbing; }
+    .kanban-card .kc-foot { align-items: flex-end; }
+    .kc-paid { font-size: var(--fs-xs); color: var(--text-3); }
+    .kc-paid b { color: var(--text-2); font-weight: 600; }
+    .kc-bar { height: 4px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; margin-top: 6px; }
+    .kc-bar > i { display: block; height: 100%; background: var(--st-paid); border-radius: var(--r-pill); }
+    .kanban-card .kc-foot .money { font-size: 16px; }
+
+    /* Оплата: способы */
+    .pay-seg { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
+    .pay-seg button { height: auto; min-height: 46px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.2; }
+    .pay-seg button small { font-size: 11px; color: var(--text-3); font-weight: 400; }
+    .ord-amt { width: 136px; flex: none; }
+    .ord-amt .input { height: 34px; font-size: var(--fs-sm); padding-right: 30px; }
+    .ord-amt .suffix { right: 10px; }
+
+    /* Hero: сопутствующие суммы */
+    .hero-stats { display: flex; gap: var(--sp-6); flex-wrap: wrap; }
+    .hero-stats > div { display: flex; flex-direction: column; gap: 4px; }
+    .hero-stats span { font-size: var(--fs-xs); color: var(--text-inverse); opacity: 0.7; }
+    .hero-stats b { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+    .ord-ctl { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; justify-content: flex-end; }
+
+    /* Состав заказа: строки, inline-редактирование и inline-подтверждение */
+    .ord-row-open { background: var(--surface-2); border-radius: var(--r-md); margin: 4px 0; }
+    .ord-row-open > .list-row { border-top: 0; }
+    .ord-edit { padding: 0 var(--sp-3) var(--sp-3); }
+    .ord-edit-actions { display: flex; justify-content: flex-end; gap: var(--sp-2); margin-top: var(--sp-3); }
+    .ord-row-danger { background: var(--st-error-bg); border-radius: var(--r-md); padding: var(--sp-3); margin: 4px 0; display: flex; flex-direction: column; gap: var(--sp-3); }
+    .ord-row-danger > p { font-size: var(--fs-body); font-weight: 600; color: var(--st-error); }
+    .ord-row-danger .ord-edit-actions { margin-top: 0; }
+    .ord-row-danger .btn-danger { background: var(--surface); }
+    .ord-row-danger .switch span { font-size: var(--fs-sm); }
+    .ord-row-end { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .ord-row-end .money { font-weight: 600; }
+    .ord-more { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--line); font-size: var(--fs-sm); }
+    .ord-add-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); flex-wrap: wrap; }
+    .ord-ico { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--surface-2); display: grid; place-items: center; flex: none; }
+    .ord-deleted { opacity: 0.55; }
+    .ord-deleted .title, .ord-deleted .money { text-decoration: line-through; }
+
+    /* Количество товара: степпер */
+    .qty { display: inline-flex; align-items: center; height: var(--control-h-sm); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); flex: none; }
+    .qty button { width: 32px; height: 100%; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; color: var(--text); border-radius: var(--r-md); }
+    .qty button:hover { background: var(--surface-2); }
+    .qty button[disabled] { opacity: 0.35; cursor: not-allowed; }
+    .qty .qty-val { min-width: 32px; text-align: center; font-weight: 600; font-size: var(--fs-sm); }
+
+    /* Ссылка на оплату */
+    .ord-link-row { display: flex; gap: var(--sp-2); align-items: center; }
+    .ord-link-row .input-wrap { flex: 1; min-width: 0; }
+    .ord-link-row .input { font-size: var(--fs-sm); }
+    .ord-link-status { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+    .ord-preview { font-size: var(--fs-sm); line-height: 1.5; margin-top: var(--sp-2); }
+
+    /* Новый клиент: раскрывается по <details> */
+    .ord-new-client summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: var(--accent-text); font-size: var(--fs-sm); font-weight: 600; list-style: none; }
+    .ord-new-client summary::-webkit-details-marker { display: none; }
+    .ord-new-client[open] summary { margin-bottom: var(--sp-3); }
+
+    @media (max-width: 767px) {
+      .ord-filter { flex: 1 1 140px; min-width: 0; }
+      .ord-search { min-width: 0; }
+      .ord-ctl { justify-content: flex-start; }
+      .pay-seg { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body data-page="orders" data-crumbs="Campus Sport|Заказы">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Заказы</h1>
+          <p class="page-sub">12 активных · к оплате 914 750 ₽</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" data-drawer="drawer-order-new"><i data-lucide="plus"></i>Создать заказ</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="input-wrap ord-search grow">
+          <i data-lucide="search" class="ico-sm"></i>
+          <input class="input" placeholder="Клиент, номер заказа, площадка" aria-label="Поиск заказов" />
+        </div>
+        <select class="select ord-filter" aria-label="Объект">
+          <option>Все объекты</option>
+          <option selected>Авиамоторная</option>
+          <option>Авиамоторная 2</option>
+          <option>Белорусская</option>
+          <option>Беляево</option>
+        </select>
+        <select class="select ord-filter" aria-label="Период">
+          <option selected>Сентябрь 2026</option>
+          <option>Октябрь 2026</option>
+          <option>Ноябрь 2026</option>
+        </select>
+        <select class="select ord-filter" aria-label="Источник">
+          <option selected>Все источники</option>
+          <option>CRM</option>
+          <option>Сайт</option>
+          <option>Виджет</option>
+        </select>
+        <div class="seg" role="group" aria-label="Вид">
+          <button class="is-active" data-tab="kanban">Канбан</button>
+          <button data-tab="list">Список</button>
+        </div>
+      </div>
+
+      <!-- ============ Канбан ============ -->
+      <section data-tab-panel="kanban" class="is-active">
+        <p class="kb-hint"><i data-lucide="grip-vertical" class="ico-sm"></i>Карточки можно перетаскивать между колонками — статус заказа поменяется сразу</p>
+
+        <div class="kanban">
+
+          <div class="kanban-col">
+            <div class="kanban-col-head">
+              <h3>Новый</h3>
+              <span class="badge badge-pending">3</span>
+              <span class="col-sum">31 500 ₽</span>
+            </div>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120470</span><span class="tag">Сайт</span></div>
+              <div class="kc-title">Команда «Орбита»</div>
+              <div class="kc-sub">Авиамоторная · Футбольный манеж 34 × 18</div>
+              <div class="kc-sub">19 сентября · 19:00–21:00 · ООО «Орбита»</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 13 500 ₽</div></div>
+                <span class="money">13 500 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120472</span><span class="tag">CRM</span></div>
+              <div class="kc-title">Анна К.</div>
+              <div class="kc-sub">Беляево · Мини-поле 20 × 10</div>
+              <div class="kc-sub">19 сентября · 10:00–11:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 4 500 ₽</div></div>
+                <span class="money">4 500 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120474</span><span class="tag">Виджет</span></div>
+              <div class="kc-title">Школа «Старт»</div>
+              <div class="kc-sub">Водный · Зал 15 × 15</div>
+              <div class="kc-sub">22 сентября · 16:00–18:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 13 500 ₽</div></div>
+                <span class="money">13 500 ₽</span>
+              </div>
+            </article>
+            <button class="kanban-add" data-drawer="drawer-order-new"><i data-lucide="plus" class="ico-sm"></i>Новый заказ</button>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head">
+              <h3>Перезвонить</h3>
+              <span class="badge badge-info">3</span>
+              <span class="col-sum">27 000 ₽</span>
+            </div>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120458</span><span class="tag">CRM</span></div>
+              <div class="kc-title">Алексей М.</div>
+              <div class="kc-sub">Сокол · Баскетбольный зал</div>
+              <div class="kc-sub">24 сентября · 15:00–17:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 13 500 ₽</div></div>
+                <span class="money">13 500 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120460</span><span class="tag">Сайт</span></div>
+              <div class="kc-title">Команда «Сигма»</div>
+              <div class="kc-sub">Кутузовский · Зал 15 × 15</div>
+              <div class="kc-sub">26 сентября · 10:00–12:00 · ООО «Сигма»</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 9 000 ₽</div></div>
+                <span class="money">9 000 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120463</span><span class="tag">Виджет</span></div>
+              <div class="kc-title">Анна К.</div>
+              <div class="kc-sub">Синергия · Мини-поле 20 × 10</div>
+              <div class="kc-sub">23 сентября · 20:00–21:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 4 500 ₽</div></div>
+                <span class="money">4 500 ₽</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head">
+              <h3>Ожидает предоплаты</h3>
+              <span class="badge badge-pending">3</span>
+              <span class="col-sum">31 500 ₽</span>
+            </div>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120448</span><span class="tag">CRM</span></div>
+              <div class="kc-title">Школа «Старт»</div>
+              <div class="kc-sub">Авиамоторная 2 · Баскетбольный зал</div>
+              <div class="kc-sub">21 сентября · 13:00–14:30</div>
+              <div class="kc-foot">
+                <div>
+                  <div class="kc-paid">Оплачено <b>2 000</b> из 6 750 ₽</div>
+                  <div class="kc-bar"><i style="width:30%"></i></div>
+                </div>
+                <span class="money">6 750 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120452</span><span class="tag">Сайт</span></div>
+              <div class="kc-title">Команда «Орбита»</div>
+              <div class="kc-sub">Авиамоторная · Футбольный манеж 34 × 18</div>
+              <div class="kc-sub">25 сентября · 18:00–21:00 · ООО «Орбита»</div>
+              <div class="kc-foot">
+                <div>
+                  <div class="kc-paid">Оплачено <b>10 000</b> из 20 250 ₽</div>
+                  <div class="kc-bar"><i style="width:49%"></i></div>
+                </div>
+                <span class="money">20 250 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120455</span><span class="tag">Виджет</span></div>
+              <div class="kc-title">Алексей М.</div>
+              <div class="kc-sub">Нагорная · Мини-поле 20 × 10</div>
+              <div class="kc-sub">27 сентября · 09:00–10:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 4 500 ₽</div></div>
+                <span class="money">4 500 ₽</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head">
+              <h3>Подтверждён</h3>
+              <span class="badge badge-confirmed">3</span>
+              <span class="col-sum">843 500 ₽</span>
+            </div>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120461</span><span class="tag">Сайт</span></div>
+              <div class="kc-title">Команда «Вектор»</div>
+              <div class="kc-sub">Авиамоторная · Футбольный манеж 34 × 18</div>
+              <div class="kc-sub">Сентябрь–ноябрь · 115 броней · ООО «Вектор»</div>
+              <div class="kc-foot">
+                <div>
+                  <div class="kc-paid">Оплачено <b>6 750</b> из 802 500 ₽</div>
+                  <div class="kc-bar"><i style="width:1%"></i></div>
+                </div>
+                <span class="money">802 500 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120440</span><span class="tag">Сайт</span></div>
+              <div class="kc-title">Анна К.</div>
+              <div class="kc-sub">Беляево · Мини-поле 20 × 10</div>
+              <div class="kc-sub">22 сентября · 14:00–16:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 9 000 ₽</div></div>
+                <span class="money">9 000 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120444</span><span class="tag">CRM</span></div>
+              <div class="kc-title">Команда «Сигма»</div>
+              <div class="kc-sub">Сокол · Баскетбольный зал</div>
+              <div class="kc-sub">26 сентября · 10:00–14:00 · ООО «Сигма»</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 0 из 32 000 ₽</div></div>
+                <span class="money">32 000 ₽</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-col-head">
+              <h3>Оплачен</h3>
+              <span class="badge badge-paid">3</span>
+              <span class="col-sum">38 250 ₽</span>
+            </div>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120420</span><span class="tag">Сайт</span></div>
+              <div class="kc-title">Школа «Старт»</div>
+              <div class="kc-sub">Водный · Зал 15 × 15</div>
+              <div class="kc-sub">14 сентября · 13:00–15:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 13 500 из 13 500 ₽</div></div>
+                <span class="money">13 500 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120425</span><span class="tag">CRM</span></div>
+              <div class="kc-title">Команда «Орбита»</div>
+              <div class="kc-sub">Авиамоторная · Футбольный манеж 34 × 18</div>
+              <div class="kc-sub">17 сентября · 12:00–15:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 20 250 из 20 250 ₽</div></div>
+                <span class="money">20 250 ₽</span>
+              </div>
+            </article>
+            <article class="kanban-card" draggable="true" data-drawer="drawer-order">
+              <div class="kc-top"><span class="num">#120436</span><span class="tag">Виджет</span></div>
+              <div class="kc-title">Алексей М.</div>
+              <div class="kc-sub">Белорусская · Мини-поле 20 × 10</div>
+              <div class="kc-sub">19 сентября · 18:00–19:00</div>
+              <div class="kc-foot">
+                <div><div class="kc-paid">Оплачено 4 500 из 4 500 ₽</div></div>
+                <span class="money">4 500 ₽</span>
+              </div>
+            </article>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============ Список ============ -->
+      <section data-tab-panel="list">
+        <div class="table-wrap stack-mobile">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>№</th>
+                <th>Клиент</th>
+                <th>Объект · площадка</th>
+                <th class="hide-mobile">Ближайшая бронь</th>
+                <th>Статус</th>
+                <th class="hide-mobile">Оплачено</th>
+                <th class="ta-r">Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120420</td>
+                <td><div class="cell-main">Школа «Старт»</div></td>
+                <td>Водный · Зал 15 × 15</td>
+                <td class="hide-mobile">14 сентября · 13:00</td>
+                <td><span class="badge badge-paid">Оплачен</span></td>
+                <td class="hide-mobile num">13 500 ₽</td>
+                <td class="ta-r money">13 500 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120425</td>
+                <td><div class="cell-main">Команда «Орбита»</div></td>
+                <td>Авиамоторная · Футбольный манеж 34 × 18</td>
+                <td class="hide-mobile">17 сентября · 12:00</td>
+                <td><span class="badge badge-paid">Оплачен</span></td>
+                <td class="hide-mobile num">20 250 ₽</td>
+                <td class="ta-r money">20 250 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120436</td>
+                <td><div class="cell-main">Алексей М.</div></td>
+                <td>Белорусская · Мини-поле 20 × 10</td>
+                <td class="hide-mobile">19 сентября · 18:00</td>
+                <td><span class="badge badge-paid">Оплачен</span></td>
+                <td class="hide-mobile num">4 500 ₽</td>
+                <td class="ta-r money">4 500 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120440</td>
+                <td><div class="cell-main">Анна К.</div></td>
+                <td>Беляево · Мини-поле 20 × 10</td>
+                <td class="hide-mobile">22 сентября · 14:00</td>
+                <td><span class="badge badge-confirmed">Подтверждён</span></td>
+                <td class="hide-mobile num">0 ₽</td>
+                <td class="ta-r money">9 000 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120444</td>
+                <td><div class="cell-main">Команда «Сигма»</div><div class="cell-sub">ООО «Сигма»</div></td>
+                <td>Сокол · Баскетбольный зал</td>
+                <td class="hide-mobile">26 сентября · 10:00</td>
+                <td><span class="badge badge-confirmed">Подтверждён</span></td>
+                <td class="hide-mobile num">0 ₽</td>
+                <td class="ta-r money">32 000 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120448</td>
+                <td><div class="cell-main">Школа «Старт»</div></td>
+                <td>Авиамоторная 2 · Баскетбольный зал</td>
+                <td class="hide-mobile">21 сентября · 13:00</td>
+                <td><span class="badge badge-pending">Ожидает предоплаты</span></td>
+                <td class="hide-mobile num">2 000 ₽</td>
+                <td class="ta-r money">6 750 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120452</td>
+                <td><div class="cell-main">Команда «Орбита»</div></td>
+                <td>Авиамоторная · Футбольный манеж 34 × 18</td>
+                <td class="hide-mobile">25 сентября · 18:00</td>
+                <td><span class="badge badge-pending">Ожидает предоплаты</span></td>
+                <td class="hide-mobile num">10 000 ₽</td>
+                <td class="ta-r money">20 250 ₽</td>
+              </tr>
+              <tr data-drawer="drawer-order">
+                <td class="num">#120461</td>
+                <td><div class="cell-main">Команда «Вектор»</div><div class="cell-sub">ООО «Вектор»</div></td>
+                <td>Авиамоторная · Футбольный манеж 34 × 18</td>
+                <td class="hide-mobile">21 сентября · 17:00</td>
+                <td><span class="badge badge-confirmed">Подтверждён</span></td>
+                <td class="hide-mobile num">6 750 ₽</td>
+                <td class="ta-r money">802 500 ₽</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot">
+            <span>Показано 8 из 15</span>
+            <button class="btn btn-sm">Показать ещё</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: заказ ============ -->
+<aside class="drawer drawer-wide" id="drawer-order" aria-label="Заказ #120461">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Команда «Вектор» · Юр. лицо ООО «Вектор»</div>
+      <h2>Заказ #120461</h2>
+      <div class="drawer-sub">
+        <select class="select ord-status-select" aria-label="Статус заказа">
+          <option>Черновик</option>
+          <option>Новый</option>
+          <option>Перезвонить</option>
+          <option>Ожидает подтверждения</option>
+          <option>Ожидает предоплаты</option>
+          <option selected>Подтверждён</option>
+          <option>Оплачен</option>
+          <option>Отменён</option>
+        </select>
+        <span class="tag">Сайт</span>
+      </div>
+    </div>
+    <button class="icon-btn" data-menu="menu-order" aria-label="Ещё"><i data-lucide="more-horizontal"></i></button>
+    <div class="menu" id="menu-order" style="right:64px;top:64px">
+      <button data-drawer="drawer-order-events"><i data-lucide="history" class="ico-sm"></i>События</button>
+      <button data-drawer="drawer-order-payments"><i data-lucide="wallet" class="ico-sm"></i>Платежи</button>
+      <button class="btn-danger" data-toast="Заказ отменён" data-toast-action="Вернуть"><i data-lucide="x-circle" class="ico-sm"></i>Отменить заказ</button>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="hero-money">
+      <div>
+        <div class="overline">Осталось оплатить</div>
+        <div class="big money">795 750 ₽</div>
+      </div>
+      <div class="hero-stats">
+        <div><span>Стоимость</span><b class="money">802 500 ₽</b></div>
+        <div><span>Оплачено</span><b class="money">6 750 ₽</b></div>
+      </div>
+    </div>
+
+    <dl class="kv">
+      <dt>Клиент</dt>
+      <dd><a href="#" data-drawer="drawer-client" style="color:var(--accent-text)">Команда «Вектор» →</a></dd>
+      <dt>Телефон</dt>
+      <dd>
+        <div class="ord-ctl">
+          <span class="num">+7 (900) 000-11-22</span>
+          <button class="btn btn-sm"><i data-lucide="message-circle" class="ico-sm"></i>WhatsApp</button>
+        </div>
+      </dd>
+      <dt>Объект</dt>
+      <dd>Авиамоторная</dd>
+    </dl>
+
+    <label class="switch"><input type="checkbox" checked /><span>Уведомления клиенту</span></label>
+
+    <div class="field">
+      <label>Комментарий</label>
+      <textarea class="textarea" placeholder="Видно администраторам объекта">Просили манишки, 2 комплекта</textarea>
+    </div>
+
+    <div class="drawer-section" data-tabs-scope>
+      <h3>Состав заказа · 115 броней</h3>
+      <div class="tabs">
+        <button class="is-active" data-tab="sep">Сентябрь <span class="count">58</span></button>
+        <button data-tab="oct">Октябрь <span class="count">40</span></button>
+        <button data-tab="nov">Ноябрь <span class="count">17</span></button>
+      </div>
+
+      <!-- Сентябрь -->
+      <div class="list is-active" data-tab-panel="sep">
+        <div class="list-row">
+          <label class="check"><input type="checkbox" disabled aria-label="Бронь оплачена" /></label>
+          <div class="grow"><div class="title">Пн, 14 сентября</div><div class="sub">13:00–14:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+          <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-paid">Оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+
+        <div class="ord-row-open">
+          <div class="list-row">
+            <label class="check"><input type="checkbox" checked aria-label="Оплатить бронь" /></label>
+            <div class="grow"><div class="title">Чт, 17 сентября</div><div class="sub">17:00–18:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+            <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+            <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+          </div>
+          <div class="ord-edit">
+            <div class="form-grid">
+              <div class="field"><label>Стоимость</label><div class="input-wrap"><input class="input num" value="6 750" /><span class="suffix">₽</span></div></div>
+              <div class="field"><label>Начало</label><input class="input" type="time" value="17:00" /></div>
+              <div class="field"><label>Окончание</label><input class="input" type="time" value="18:00" /></div>
+              <div class="field"><label>Комментарий</label><input class="input" placeholder="Необязательно" /></div>
+            </div>
+            <div class="ord-edit-actions">
+              <button class="btn btn-sm">Отмена</button>
+              <button class="btn btn-dark btn-sm">Сохранить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-row">
+          <label class="check"><input type="checkbox" checked aria-label="Оплатить бронь" /></label>
+          <div class="grow"><div class="title">Пт, 18 сентября</div><div class="sub">18:00–19:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+          <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+
+        <div class="ord-row-danger">
+          <div class="list-row" style="border-top:0;padding:0">
+            <label class="check"><input type="checkbox" disabled aria-label="Бронь оплачена" /></label>
+            <div class="grow"><div class="title">Чт, 24 сентября</div><div class="sub">17:00–18:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+            <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-paid">Оплачено</span></div>
+            <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+          </div>
+          <p>Удалить бронь 24 сентября?</p>
+          <label class="switch"><input type="checkbox" checked /><span>Вернуть 6 750 ₽ на счёт клиента</span></label>
+          <div class="ord-edit-actions">
+            <button class="btn btn-danger btn-sm">Удалить</button>
+            <button class="btn btn-sm">Нет</button>
+          </div>
+        </div>
+
+        <div class="list-row">
+          <label class="check"><input type="checkbox" aria-label="Оплатить бронь" /></label>
+          <div class="grow"><div class="title">Сб, 26 сентября</div><div class="sub">10:00–12:00 · Баскетбольный зал · Баскетбол</div></div>
+          <div class="ord-row-end"><b class="money">9 000 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+
+        <div class="ord-more"><span class="subtle">Показаны 5 из 58</span><button class="btn btn-sm">Показать ещё</button></div>
+      </div>
+
+      <!-- Октябрь -->
+      <div class="list" data-tab-panel="oct">
+        <div class="list-row">
+          <label class="check"><input type="checkbox" aria-label="Оплатить бронь" /></label>
+          <div class="grow"><div class="title">Вт, 6 октября</div><div class="sub">10:00–11:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+          <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+        <div class="list-row">
+          <label class="check"><input type="checkbox" aria-label="Оплатить бронь" /></label>
+          <div class="grow"><div class="title">Сб, 10 октября</div><div class="sub">12:00–14:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+          <div class="ord-row-end"><b class="money">13 500 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+        <div class="ord-more"><span class="subtle">Показаны 2 из 40</span><button class="btn btn-sm">Показать ещё</button></div>
+      </div>
+
+      <!-- Ноябрь -->
+      <div class="list" data-tab-panel="nov">
+        <div class="list-row">
+          <label class="check"><input type="checkbox" aria-label="Оплатить бронь" /></label>
+          <div class="grow"><div class="title">Пн, 2 ноября</div><div class="sub">19:00–20:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+          <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+        <div class="list-row">
+          <label class="check"><input type="checkbox" aria-label="Оплатить бронь" /></label>
+          <div class="grow"><div class="title">Пн, 9 ноября</div><div class="sub">19:00–20:00 · Футбольный манеж 34 × 18 · Футбол</div></div>
+          <div class="ord-row-end"><b class="money">6 750 ₽</b><span class="badge badge-pending">Не оплачено</span></div>
+          <button class="icon-btn" aria-label="Действия с бронью"><i data-lucide="more-horizontal"></i></button>
+        </div>
+        <div class="ord-more"><span class="subtle">Показаны 2 из 17</span><button class="btn btn-sm">Показать ещё</button></div>
+      </div>
+
+      <div class="ord-add-row">
+        <button class="btn btn-sm" data-drawer="drawer-order-add-booking"><i data-lucide="plus" class="ico-sm"></i>Бронь</button>
+        <button class="btn btn-sm" data-drawer="drawer-order-add-product"><i data-lucide="plus" class="ico-sm"></i>Товар</button>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Дополнительно</h3>
+      <div class="list">
+        <div class="list-row">
+          <span class="ord-ico"><i data-lucide="package" class="ico-sm"></i></span>
+          <div class="grow"><div class="title">Аренда мячей</div><div class="sub">×2 · 300 ₽ за шт.</div></div>
+          <b class="money">600 ₽</b>
+        </div>
+        <div class="list-row">
+          <span class="ord-ico"><i data-lucide="shirt" class="ico-sm"></i></span>
+          <div class="grow"><div class="title">Манишки</div><div class="sub">×10 · 100 ₽ за шт.</div></div>
+          <b class="money">1 000 ₽</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-foot">
+    <button class="btn" data-drawer="drawer-order-link"><i data-lucide="link"></i>Ссылка на оплату</button>
+    <button class="btn btn-primary" data-drawer="drawer-order-pay"><i data-lucide="credit-card"></i>Оплатить выбранное · 13 500 ₽</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: оплата заказа (стек поверх заказа) ============ -->
+<aside class="drawer" id="drawer-order-pay" aria-label="Оплата заказа">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Заказ #120461 · Команда «Вектор»</div><h2>Оплата</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Способ оплаты</label>
+      <div class="seg pay-seg">
+        <button class="is-active">Наличные</button>
+        <button>Терминал</button>
+        <button>Перевод на карту</button>
+        <button>QR</button>
+        <button>Счёт клиента<small>баланс 12 000 ₽</small></button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Касса</label>
+      <select class="select"><option>Наличные · Авиамоторная (32 500 ₽)</option><option>Терминал · Авиамоторная</option></select>
+    </div>
+    <div class="field">
+      <label>Позиции к оплате</label>
+      <div class="list">
+        <div class="list-row">
+          <label class="check"><input type="checkbox" checked aria-label="Выбрать позицию" /></label>
+          <div class="grow"><div class="title">Чт, 17 сентября</div><div class="sub">17:00–18:00 · Футбольный манеж 34 × 18</div></div>
+          <div class="input-wrap ord-amt"><input class="input num" value="6 750" aria-label="Сумма к оплате" /><span class="suffix">₽</span></div>
+        </div>
+        <div class="list-row">
+          <label class="check"><input type="checkbox" checked aria-label="Выбрать позицию" /></label>
+          <div class="grow"><div class="title">Пт, 18 сентября</div><div class="sub">18:00–19:00 · Футбольный манеж 34 × 18</div></div>
+          <div class="input-wrap ord-amt"><input class="input num" value="6 750" aria-label="Сумма к оплате" /><span class="suffix">₽</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="summary-box">
+      <div class="row"><span class="muted">Итого к оплате</span><span class="money">13 500 ₽</span></div>
+      <div class="row"><span class="muted">Баланс кассы после</span><span class="money">46 000 ₽</span></div>
+      <div class="row total"><span>Остаток по заказу</span><span class="money">782 250 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Назад</button>
+    <button class="btn btn-primary" data-toast="Оплата 13 500 ₽ проведена" data-close-after>Провести 13 500 ₽</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: ссылка на оплату (2 шага) ============ -->
+<aside class="drawer" id="drawer-order-link" aria-label="Ссылка на оплату" data-tabs-scope>
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Заказ #120461 · Команда «Вектор»</div><h2>Ссылка на оплату</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="tabs">
+      <button class="is-active" data-tab="s1">1. Сумма</button>
+      <button data-tab="s2">2. Отправка</button>
+    </div>
+
+    <!-- Шаг 1 -->
+    <div data-tab-panel="s1" class="is-active">
+      <div class="list">
+        <div class="list-row">
+          <label class="check"><input type="checkbox" checked aria-label="Включить позицию" /></label>
+          <div class="grow"><div class="title">Чт, 17 сентября</div><div class="sub">17:00–18:00 · Футбольный манеж 34 × 18</div></div>
+          <b class="money">6 750 ₽</b>
+        </div>
+        <div class="list-row">
+          <label class="check"><input type="checkbox" checked aria-label="Включить позицию" /></label>
+          <div class="grow"><div class="title">Пт, 18 сентября</div><div class="sub">18:00–19:00 · Футбольный манеж 34 × 18</div></div>
+          <b class="money">6 750 ₽</b>
+        </div>
+      </div>
+      <div class="summary-box" style="margin-top:var(--sp-5)">
+        <div class="row"><span class="muted">Сумма ссылки</span><span class="money">13 500 ₽</span></div>
+        <div class="row"><span class="muted">Действует</span><span>7 дней, до 11 ноября</span></div>
+      </div>
+      <div style="margin-top:var(--sp-5)">
+        <button class="btn btn-dark btn-block" data-tab="s2"><i data-lucide="link"></i>Сформировать ссылку</button>
+      </div>
+    </div>
+
+    <!-- Шаг 2 -->
+    <div data-tab-panel="s2">
+      <div class="ord-link-status">
+        <span class="badge badge-pending">Ожидает оплаты</span>
+        <span class="subtle">Создана 4 ноября, 10:12 · 13 500 ₽</span>
+      </div>
+      <div class="field">
+        <label>Ссылка</label>
+        <div class="ord-link-row">
+          <div class="input-wrap"><i data-lucide="link" class="ico-sm"></i><input class="input num" readonly value="https://pay.beinteam.ru/l/8f3k2" aria-label="Ссылка на оплату" /></div>
+          <button class="btn" data-toast="Ссылка скопирована"><i data-lucide="copy" class="ico-sm"></i>Скопировать</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Шаблон сообщения</label>
+        <div class="chip-row" data-chip-group>
+          <button class="chip is-active">Короткое</button>
+          <button class="chip">С деталями брони</button>
+          <button class="chip">Напоминание</button>
+        </div>
+      </div>
+      <div class="summary-box">
+        <div class="overline">Предпросмотр</div>
+        <p class="ord-preview">Здравствуйте! Оплатите заказ #120461 по ссылке: https://pay.beinteam.ru/l/8f3k2</p>
+      </div>
+      <div class="list" style="margin-top:var(--sp-5)">
+        <button class="btn btn-primary btn-block" data-toast="Сообщение отправлено в WhatsApp"><i data-lucide="message-circle"></i>Отправить в WhatsApp</button>
+        <button class="btn btn-block" style="margin-top:var(--sp-2)" data-toast="Ссылка готова к отправке"><i data-lucide="share-2"></i>Поделиться</button>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-tab="s1">Назад</button>
+    <button class="btn btn-dark" data-drawer-close>Закрыть</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: платежи заказа ============ -->
+<aside class="drawer" id="drawer-order-payments" aria-label="Платежи заказа">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Заказ #120461 · Команда «Вектор»</div><h2>Платежи</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="summary-box">
+      <div class="row"><span class="muted">Оплачено по заказу</span><b class="money">6 750 ₽</b></div>
+      <div class="row"><span class="muted">Осталось оплатить</span><b class="money">795 750 ₽</b></div>
+    </div>
+    <div class="list">
+      <div class="list-row">
+        <div class="grow">
+          <div class="title">Перевод на карту · Авиамоторная</div>
+          <div class="sub">Ручная операция · Вера Администратор · 20 сен, 18:42</div>
+        </div>
+        <b class="money amount-plus">+6 750 ₽</b>
+        <button class="icon-btn" aria-label="Удалить операцию"><i data-lucide="trash-2"></i></button>
+      </div>
+      <div class="ord-row-danger">
+        <p>Удалить операцию 6 750 ₽?</p>
+        <div class="ord-edit-actions">
+          <button class="btn btn-danger btn-sm">Удалить</button>
+          <button class="btn btn-sm">Нет</button>
+        </div>
+      </div>
+      <div class="list-row ord-deleted">
+        <div class="grow">
+          <div class="title">Терминал · Авиамоторная</div>
+          <div class="sub">Оплата заказа · удалена 21 сен, Вера Администратор</div>
+        </div>
+        <span class="tag">Удалена</span>
+        <b class="money">+2 000 ₽</b>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ Панель: события заказа ============ -->
+<aside class="drawer" id="drawer-order-events" aria-label="События заказа">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Заказ #120461</div><h2>События</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body" data-tabs-scope>
+    <div class="seg" role="group" aria-label="Раздел событий">
+      <button class="is-active" data-tab="ord">Заказ</button>
+      <button data-tab="bk">Брони</button>
+    </div>
+    <div class="timeline is-active" data-tab-panel="ord">
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="plus"></i></span><div><div class="tl-text">Заказ создан с сайта</div><div class="tl-meta">Клиент · 12 сен, 14:20</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="tl-text">Статус изменён: Новый → Ожидает предоплаты</div><div class="tl-meta">Вера Администратор · 12 сен, 15:05</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="tl-text">Статус изменён: Ожидает предоплаты → Подтверждён</div><div class="tl-meta">Вера Администратор · 13 сен, 11:30</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="link"></i></span><div><div class="tl-text">Отправлена ссылка на оплату · 6 750 ₽</div><div class="tl-meta">Вера Администратор · 14 сен, 09:12</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="wallet"></i></span><div><div class="tl-text">Оплата 6 750 ₽ · перевод на карту</div><div class="tl-meta">Вера Администратор · 14 сен, 17:40</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="calendar"></i></span><div><div class="tl-text">Изменена бронь 17 сентября: стоимость 6 500 → 6 750 ₽</div><div class="tl-meta">Вера Администратор · 15 сен, 10:02</div></div></div>
+    </div>
+    <div class="timeline" data-tab-panel="bk">
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="plus"></i></span><div><div class="tl-text">Бронь 26 сентября создана из расписания</div><div class="tl-meta">Вера Администратор · 14 сен, 16:20</div></div></div>
+      <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="tl-text">Бронь 17 сентября: время 17:00–18:00</div><div class="tl-meta">Вера Администратор · 15 сен, 10:02</div></div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ Панель: бронь в заказ ============ -->
+<aside class="drawer" id="drawer-order-add-booking" aria-label="Добавить бронь в заказ">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Заказ #120461 · Команда «Вектор»</div><h2>Бронь в заказ</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div class="field span-2"><label>Площадка</label><select class="select"><option>Футбольный манеж 34 × 18</option><option>Мини-поле 20 × 10</option></select></div>
+      <div class="field"><label>Дата</label><input class="input" type="date" value="2026-09-28" /></div>
+      <div class="field"><label>Активность</label><select class="select"><option>Футбол</option><option>Мини-футбол</option></select></div>
+    </div>
+    <div class="field">
+      <label>Время · цена по тарифу «Будни вечер»</label>
+      <div class="slot-pick">
+        <button disabled>10:00<small>занято</small></button>
+        <button>11:00<small>6 750 ₽</small></button>
+        <button>12:00<small>6 750 ₽</small></button>
+        <button disabled>13:00<small>занято</small></button>
+        <button>16:00<small>6 750 ₽</small></button>
+        <button class="is-active">17:00<small>6 750 ₽</small></button>
+        <button class="is-active">18:00<small>6 750 ₽</small></button>
+        <button>19:00<small>6 750 ₽</small></button>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" /> Повторять каждую неделю до конца сезона</label>
+    <div class="summary-box">
+      <div class="row"><span class="muted">Пн, 28 сентября · 17:00–19:00</span><span>2 ч</span></div>
+      <div class="row"><span class="muted">Тариф</span><span>6 750 ₽ / ч</span></div>
+      <div class="row total"><span>Итого</span><span class="money">13 500 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Бронь добавлена в заказ #120461" data-close-after><i data-lucide="check"></i>Добавить в заказ</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: товар в заказ ============ -->
+<aside class="drawer" id="drawer-order-add-product" aria-label="Добавить товар в заказ">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Заказ #120461 · Команда «Вектор»</div><h2>Добавить товар</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="list">
+      <div class="list-row">
+        <span class="ord-ico"><i data-lucide="package" class="ico-sm"></i></span>
+        <div class="grow"><div class="title">Аренда мячей</div><div class="sub">300 ₽ за шт.</div></div>
+        <b class="money">600 ₽</b>
+        <div class="qty"><button aria-label="Меньше"><i data-lucide="minus" class="ico-sm"></i></button><span class="qty-val num">2</span><button aria-label="Больше"><i data-lucide="plus" class="ico-sm"></i></button></div>
+      </div>
+      <div class="list-row">
+        <span class="ord-ico"><i data-lucide="shirt" class="ico-sm"></i></span>
+        <div class="grow"><div class="title">Манишки</div><div class="sub">100 ₽ за шт.</div></div>
+        <b class="money">1 000 ₽</b>
+        <div class="qty"><button aria-label="Меньше"><i data-lucide="minus" class="ico-sm"></i></button><span class="qty-val num">10</span><button aria-label="Больше"><i data-lucide="plus" class="ico-sm"></i></button></div>
+      </div>
+      <div class="list-row">
+        <span class="ord-ico"><i data-lucide="package" class="ico-sm"></i></span>
+        <div class="grow"><div class="title">Вода</div><div class="sub">80 ₽ за шт.</div></div>
+        <b class="money">0 ₽</b>
+        <div class="qty"><button aria-label="Меньше" disabled><i data-lucide="minus" class="ico-sm"></i></button><span class="qty-val num">0</span><button aria-label="Больше"><i data-lucide="plus" class="ico-sm"></i></button></div>
+      </div>
+      <div class="list-row">
+        <span class="ord-ico"><i data-lucide="package" class="ico-sm"></i></span>
+        <div class="grow"><div class="title">Полотенце</div><div class="sub">150 ₽ за шт.</div></div>
+        <b class="money">0 ₽</b>
+        <div class="qty"><button aria-label="Меньше" disabled><i data-lucide="minus" class="ico-sm"></i></button><span class="qty-val num">0</span><button aria-label="Больше"><i data-lucide="plus" class="ico-sm"></i></button></div>
+      </div>
+    </div>
+    <div class="summary-box">
+      <div class="row"><span class="muted">Товаров</span><span>12 шт</span></div>
+      <div class="row total"><span>Итого</span><span class="money">1 600 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Товары добавлены в заказ" data-close-after>Добавить · 1 600 ₽</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: новый заказ ============ -->
+<aside class="drawer" id="drawer-order-new" aria-label="Новый заказ">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Клиент, юр. лицо и источник</div><h2>Новый заказ</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div class="field"><label>Объект</label><select class="select"><option selected>Авиамоторная</option><option>Авиамоторная 2</option><option>Белорусская</option></select></div>
+      <div class="field"><label>Источник</label><select class="select"><option selected>CRM</option><option>Сайт</option><option>Виджет</option></select></div>
+    </div>
+    <div class="field">
+      <label>Клиент</label>
+      <div class="input-wrap"><i data-lucide="search" class="ico-sm"></i><input class="input" placeholder="Имя, телефон или компания" /></div>
+    </div>
+    <details class="ord-new-client">
+      <summary><i data-lucide="user-plus" class="ico-sm"></i>Новый клиент</summary>
+      <div class="form-grid">
+        <div class="field"><label>Имя</label><input class="input" /></div>
+        <div class="field"><label>Фамилия</label><input class="input" /></div>
+        <div class="field"><label>Телефон</label><input class="input" placeholder="+7 (___) ___-__-__" /></div>
+        <div class="field"><label>E-mail</label><input class="input" placeholder="client@example.com" /></div>
+      </div>
+    </details>
+    <div class="field">
+      <label>Юридическое лицо</label>
+      <select class="select"><option>Без юр. лица</option><option selected>ООО «Вектор»</option><option>ООО «Орбита»</option><option>ООО «Сигма»</option></select>
+    </div>
+    <div class="field"><label>Комментарий</label><textarea class="textarea" placeholder="Необязательно"></textarea></div>
+    <label class="switch"><input type="checkbox" checked /><span>Уведомлять клиента о статусе заказа</span></label>
+    <div class="summary-box">
+      <span class="muted"><i data-lucide="info" class="ico-sm"></i> Брони добавляются из расписания или после создания заказа</span>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Отмена</button>
+    <button class="btn btn-primary" data-toast="Заказ создан" data-toast-action="Открыть" data-close-after>Создать</button>
+  </div>
+</aside>
+
+<!-- Заглушка: карточка клиента — в приложении та же панель, что на clients.html -->
+<aside class="drawer" id="drawer-client" aria-label="Клиент">
+  <div class="drawer-head"><div class="grow"><div class="overline">Клиент</div><h2>Команда «Вектор»</h2><div class="drawer-sub"><span class="tag">Юридическое лицо</span></div></div><button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button></div>
+  <div class="drawer-body"><p class="muted">Полная карточка клиента — на странице <a href="clients.html#client" style="color:var(--accent-text)">Клиенты</a>.</p></div>
+</aside>
+</body>
+</html>

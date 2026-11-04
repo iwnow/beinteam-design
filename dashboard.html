@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Сегодня — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Двухколоночная раскладка: слева основное, справа «внимание/смена/кассы» */
+    .dash { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+    .dash-col { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+    .dash-stats { margin-bottom: var(--sp-4); }
+    .dash-stats .stat-value { font-size: 26px; }
+    .dash .card-head .btn { margin-left: auto; }
+    @media (max-width: 1100px) { .dash { grid-template-columns: minmax(0, 1fr); } }
+
+    /* Строка брони в «Ближайших бронях» (.list-row с data-drawer) */
+    .list-row[data-drawer] { cursor: pointer; }
+    .list-row[data-drawer]:hover { background: var(--surface-2); }
+    .list-row.is-now { position: relative; background: var(--surface-2); border-radius: var(--r-md); border-top-color: transparent; padding-left: var(--sp-4); }
+    .list-row.is-now::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: var(--accent); }
+    .bk-time { width: 84px; flex: none; font-family: var(--font-display); font-weight: 700; font-size: 18px; line-height: 1.1; }
+    .bk-time small { display: block; margin-top: 3px; font-family: var(--font-text); font-weight: 400; font-size: var(--fs-xs); color: var(--text-3); }
+    .bk-end { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+    .bk-sum { font-weight: 600; font-size: var(--fs-sm); }
+    .bk-now { color: var(--accent-text); font-weight: 600; }
+
+    /* Загрузка площадок: полосы по часам 08–23 (15 ч) */
+    .tl-rows { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .tl-line { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--sp-4); align-items: center; }
+    .tl-name { font-weight: 600; font-size: var(--fs-sm); min-width: 0; }
+    .tl-name small { display: block; font-weight: 400; font-size: var(--fs-xs); color: var(--text-3); margin-top: 2px; }
+    .tl-bar { position: relative; height: 30px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+    .tl-seg { position: absolute; top: 0; bottom: 0; background: var(--st-confirmed-bg); box-shadow: inset -1px 0 0 var(--surface); }
+    .tl-seg.is-paid { background: var(--st-paid-bg); }
+    .tl-now { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); z-index: 1; }
+    .tl-axis-row { margin: 6px 0 0 196px; }
+    .tl-axis { position: relative; height: 14px; font-size: 11px; color: var(--text-3); }
+    .tl-axis span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+    .tl-axis span:first-child { transform: none; }
+    .tl-axis span:last-child { transform: translateX(-100%); }
+    .sw-free { background: var(--surface-2); border: 1px solid var(--line); }
+    .dash .legend { margin-top: var(--sp-4); }
+
+    /* Выбор способа оплаты на всю ширину */
+    .seg-full { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; }
+    .seg-full button { white-space: normal; }
+
+    @media (max-width: 767px) {
+      .tl-line { grid-template-columns: 1fr; gap: 6px; }
+      .tl-axis-row { margin-left: 0; }
+      .bk-time { width: 72px; }
+      .seg-full { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body data-page="dashboard" data-crumbs="Campus Sport|Сегодня">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Добрый вечер, Вера</h1>
+          <p class="page-sub">Понедельник, 21 сентября · Авиамоторная · смена до 23:00</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-primary" href="schedule.html#new"><i data-lucide="plus"></i>Новая бронь</a>
+          <a class="btn" href="orders.html#order-new"><i data-lucide="file-plus-2"></i>Создать заказ</a>
+        </div>
+      </div>
+
+      <div class="grid grid-4 dash-stats">
+        <div class="stat">
+          <span class="stat-label"><i data-lucide="calendar-check" class="ico-sm"></i>Брони сегодня</span>
+          <span class="stat-value num">18</span>
+          <span class="stat-delta">из них 3 впереди</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><i data-lucide="banknote" class="ico-sm"></i>Выручка сегодня</span>
+          <span class="stat-value money">124 500 ₽</span>
+          <span class="stat-delta up">+12% к прошлому пн</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><i data-lucide="wallet" class="ico-sm"></i>К оплате сегодня</span>
+          <span class="stat-value money">27 000 ₽</span>
+          <span class="stat-delta">3 брони</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><i data-lucide="activity" class="ico-sm"></i>Загрузка площадок</span>
+          <span class="stat-value num">74%</span>
+          <span class="stat-delta">08:00–23:00</span>
+        </div>
+      </div>
+
+      <div class="dash">
+        <!-- Слева -->
+        <div class="dash-col">
+          <section class="card">
+            <div class="card-head">
+              <h3>Ближайшие брони</h3>
+              <a class="btn btn-sm btn-ghost" href="schedule.html">Расписание<i data-lucide="arrow-right" class="ico-sm"></i></a>
+            </div>
+            <div class="list">
+              <div class="list-row is-now" data-drawer="drawer-booking">
+                <div class="bk-time">17:00<small>–18:00</small></div>
+                <div class="grow">
+                  <div class="title">Команда «Вектор»</div>
+                  <div class="sub"><span class="bk-now">Сейчас идёт</span> · Футбольный манеж 34 × 18</div>
+                </div>
+                <div class="bk-end">
+                  <span class="badge badge-pending">Ожидает предоплаты</span>
+                  <span class="bk-sum money">6 750 ₽</span>
+                </div>
+                <button class="btn btn-sm" data-drawer="drawer-pay">Оплатить</button>
+              </div>
+              <div class="list-row" data-drawer="drawer-booking">
+                <div class="bk-time">18:00<small>–20:00</small></div>
+                <div class="grow">
+                  <div class="title">Школа «Старт»</div>
+                  <div class="sub">Футбольный манеж 34 × 18</div>
+                </div>
+                <div class="bk-end">
+                  <span class="badge badge-confirmed">Подтверждён</span>
+                  <span class="bk-sum money">13 500 ₽</span>
+                </div>
+                <button class="btn btn-sm" data-drawer="drawer-pay">Оплатить</button>
+              </div>
+              <div class="list-row" data-drawer="drawer-booking">
+                <div class="bk-time">19:00<small>–21:00</small></div>
+                <div class="grow">
+                  <div class="title">Команда «Орбита»</div>
+                  <div class="sub">Мини-поле 20 × 10</div>
+                </div>
+                <div class="bk-end">
+                  <span class="badge badge-paid">Оплачен</span>
+                  <span class="bk-sum money">13 500 ₽</span>
+                </div>
+              </div>
+              <div class="list-row" data-drawer="drawer-booking">
+                <div class="bk-time">21:00<small>–22:00</small></div>
+                <div class="grow">
+                  <div class="title">Алексей М.</div>
+                  <div class="sub">Баскетбольный зал</div>
+                </div>
+                <div class="bk-end">
+                  <span class="badge badge-pending">Ожидает подтверждения</span>
+                  <span class="bk-sum money">6 750 ₽</span>
+                </div>
+                <button class="btn btn-sm" data-drawer="drawer-pay">Оплатить</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h3>Загрузка по площадкам сегодня</h3>
+              <span class="subtle">08:00–23:00</span>
+            </div>
+            <div class="tl-rows">
+              <div class="tl-line">
+                <div class="tl-name">Футбольный манеж 34 × 18<small>Свободно: 9:00–13:00, 21:00–23:00</small></div>
+                <div class="tl-bar">
+                  <div class="tl-seg is-paid" style="left:33.33%;width:10%"></div>
+                  <div class="tl-seg" style="left:43.33%;width:16.67%"></div>
+                  <div class="tl-seg" style="left:60%;width:6.67%"></div>
+                  <div class="tl-seg" style="left:66.67%;width:13.33%"></div>
+                  <div class="tl-seg" style="left:80%;width:6.67%"></div>
+                  <div class="tl-now" style="left:63.33%"></div>
+                </div>
+              </div>
+              <div class="tl-line">
+                <div class="tl-name">Мини-поле 20 × 10</div>
+                <div class="tl-bar">
+                  <div class="tl-seg is-paid" style="left:6.67%;width:13.33%"></div>
+                  <div class="tl-seg" style="left:26.67%;width:13.33%"></div>
+                  <div class="tl-seg is-paid" style="left:53.33%;width:13.33%"></div>
+                  <div class="tl-seg is-paid" style="left:73.33%;width:13.33%"></div>
+                  <div class="tl-now" style="left:63.33%"></div>
+                </div>
+              </div>
+              <div class="tl-line">
+                <div class="tl-name">Баскетбольный зал</div>
+                <div class="tl-bar">
+                  <div class="tl-seg is-paid" style="left:13.33%;width:13.33%"></div>
+                  <div class="tl-seg" style="left:26.67%;width:6.67%"></div>
+                  <div class="tl-seg" style="left:53.33%;width:26.67%"></div>
+                  <div class="tl-seg" style="left:86.67%;width:6.67%"></div>
+                  <div class="tl-now" style="left:63.33%"></div>
+                </div>
+              </div>
+              <div class="tl-line">
+                <div class="tl-name">Теннисный корт</div>
+                <div class="tl-bar">
+                  <div class="tl-seg" style="left:40%;width:13.33%"></div>
+                  <div class="tl-seg is-paid" style="left:66.67%;width:6.67%"></div>
+                  <div class="tl-seg" style="left:86.67%;width:13.33%"></div>
+                  <div class="tl-now" style="left:63.33%"></div>
+                </div>
+              </div>
+              <div class="tl-axis-row">
+                <div class="tl-axis">
+                  <span style="left:0">08</span><span style="left:20%">11</span><span style="left:40%">14</span><span style="left:60%">17</span><span style="left:80%">20</span><span style="left:100%">23</span>
+                </div>
+              </div>
+            </div>
+            <div class="legend">
+              <span><i style="background:var(--st-paid-bg)"></i>Оплачено</span>
+              <span><i style="background:var(--st-confirmed-bg)"></i>Занято</span>
+              <span><i class="sw-free"></i>Свободно</span>
+              <span><i style="background:var(--accent);width:2px;height:12px;border-radius:0"></i>Сейчас 17:30</span>
+            </div>
+          </section>
+        </div>
+
+        <!-- Справа -->
+        <div class="dash-col">
+          <section class="card">
+            <div class="card-head"><h3>Требует внимания</h3></div>
+            <div class="list">
+              <a class="list-row" href="orders.html#order">
+                <div class="grow"><div class="title">2 новых заказа с сайта</div><div class="sub">#131799, #131800 · 10 мин назад</div></div>
+                <i data-lucide="chevron-right" class="ico-sm"></i>
+              </a>
+              <div class="list-row" data-drawer="drawer-booking">
+                <div class="grow"><div class="title">Неоплаченная бронь через 30 мин</div><div class="sub">Школа «Старт» · 18:00 · 13 500 ₽</div></div>
+                <i data-lucide="chevron-right" class="ico-sm"></i>
+              </div>
+              <a class="list-row" href="cashbox.html">
+                <div class="grow"><div class="title">Расхождение кассы</div><div class="sub">Наличные · Авиамоторная · −1 500 ₽ к отчёту</div></div>
+                <span class="badge badge-error">Проверить</span>
+              </a>
+              <a class="list-row" href="orders.html#order">
+                <div class="grow"><div class="title">Перезвонить: Алексей М.</div><div class="sub">Заказ #131801 · просит после 18:00</div></div>
+                <span class="badge badge-info">Перезвонить</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h3>Смена</h3>
+              <span class="badge badge-paid">Открыта 08:02</span>
+            </div>
+            <dl class="kv">
+              <dt>Администратор</dt><dd>Вера Администратор</dd>
+              <dt>Закрыть до</dt><dd>23:00</dd>
+              <dt>Продажи за смену</dt><dd class="money">124 500 ₽</dd>
+            </dl>
+            <a class="btn btn-block" style="margin-top:var(--sp-4)" href="tasks.html#task"><i data-lucide="log-out"></i>Закрыть смену</a>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><h3>Кассы объекта</h3><span class="subtle">за смену</span></div>
+            <div class="list">
+              <a class="list-row" href="cashbox.html">
+                <div class="grow"><div class="title">Наличные</div><div class="sub">Авиамоторная</div></div>
+                <b class="money">32 500 ₽</b><i data-lucide="chevron-right" class="ico-sm"></i>
+              </a>
+              <a class="list-row" href="cashbox.html">
+                <div class="grow"><div class="title">Терминал</div><div class="sub">Авиамоторная</div></div>
+                <b class="money">54 000 ₽</b><i data-lucide="chevron-right" class="ico-sm"></i>
+              </a>
+              <a class="list-row" href="cashbox.html">
+                <div class="grow"><div class="title">QR</div><div class="sub">Онлайн-оплата</div></div>
+                <b class="money">18 000 ₽</b><i data-lucide="chevron-right" class="ico-sm"></i>
+              </a>
+              <a class="list-row" href="cashbox.html">
+                <div class="grow"><div class="title">Расчётный счёт</div><div class="sub">Перевод на счёт</div></div>
+                <b class="money">20 000 ₽</b><i data-lucide="chevron-right" class="ico-sm"></i>
+              </a>
+            </div>
+          </section>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ Панель: бронь (краткая карточка) ============ -->
+<aside class="drawer" id="drawer-booking" aria-label="Бронь">
+  <div class="drawer-head">
+    <div class="grow">
+      <div class="overline">Бронь #245992</div>
+      <h2>Команда «Вектор»</h2>
+      <div class="drawer-sub"><span class="badge badge-pending">Ожидает предоплаты</span><span>Пн, 21 сентября · 17:00–18:00</span></div>
+    </div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div>
+        <div class="overline">Стоимость брони</div>
+        <div class="drawer-money money">6 750 ₽</div>
+      </div>
+      <div class="field">
+        <label>Статус заказа</label>
+        <select class="select" aria-label="Статус заказа">
+          <option>Новый</option><option>Перезвонить</option><option>Ожидает подтверждения</option>
+          <option selected>Ожидает предоплаты</option><option>Подтверждён</option><option>Оплачен</option><option>Отменён</option>
+        </select>
+      </div>
+    </div>
+
+    <dl class="kv">
+      <dt>Площадка</dt><dd>Футбольный манеж 34 × 18</dd>
+      <dt>Объект</dt><dd>Авиамоторная</dd>
+      <dt>Клиент</dt><dd>Команда «Вектор»</dd>
+      <dt>Телефон</dt><dd class="num">+7 (900) 000-11-22</dd>
+      <dt>Заказ</dt><dd class="num">#120461</dd>
+    </dl>
+
+    <div class="summary-box">
+      <div class="row"><span class="muted">Оплачено по заказу</span><b class="money amount-minus">0 ₽</b></div>
+      <div class="row"><span class="muted">Стоимость заказа</span><b class="money">802 500 ₽</b></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <a class="btn" href="schedule.html#booking"><i data-lucide="pencil"></i>Изменить</a>
+    <button class="btn btn-primary" data-drawer="drawer-pay"><i data-lucide="credit-card"></i>Оплатить</button>
+  </div>
+</aside>
+
+<!-- ============ Панель: оплата (стек поверх брони) ============ -->
+<aside class="drawer" id="drawer-pay" aria-label="Оплата">
+  <div class="drawer-head">
+    <div class="grow"><div class="overline">Бронь #245992 · заказ #120461</div><h2>Оплата</h2></div>
+    <button class="icon-btn" data-drawer-close aria-label="Закрыть"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Способ оплаты</label>
+      <div class="seg seg-full">
+        <button class="is-active">Наличные</button><button>Терминал</button><button>QR</button><button>Счёт клиента</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Касса</label>
+      <select class="select" aria-label="Касса">
+        <option>Наличные · Авиамоторная (32 500 ₽)</option>
+        <option>Терминал · Авиамоторная</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Сумма</label>
+      <div class="input-wrap"><input class="input num" value="6 750" aria-label="Сумма" /><span class="suffix">₽</span></div>
+    </div>
+    <div class="summary-box">
+      <div class="row"><span class="muted">К оплате по брони</span><span class="money">6 750 ₽</span></div>
+      <div class="row"><span class="muted">Баланс кассы после</span><span class="money">39 250 ₽</span></div>
+      <div class="row total"><span>Остаток по заказу</span><span class="money">795 750 ₽</span></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" data-drawer-close>Назад</button>
+    <button class="btn btn-primary" data-toast="Оплата 6 750 ₽ проведена" data-close-after><i data-lucide="check"></i>Провести 6 750 ₽</button>
+  </div>
+</aside>
+</body>
+</html>

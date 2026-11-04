@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Отчёты — BeInTeam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <style>
+    /* Столбчатый график на чистом HTML/CSS: высота столбца — в процентах от области */
+    .chart-wrap { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--sp-2); }
+    .chart-y { display: flex; flex-direction: column; justify-content: space-between; height: 220px; font-size: 11px; color: var(--text-3); text-align: right; padding-right: 4px; }
+    .chart-area { height: 220px; display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid var(--line-strong); background-image: repeating-linear-gradient(to top, var(--line) 0 1px, transparent 1px 25%); }
+    .chart-col { flex: 1; height: 100%; display: flex; align-items: flex-end; min-width: 0; }
+    .bar { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--text); }
+    .bar.is-weekend { background: var(--accent); }
+    .chart-x { display: flex; gap: 6px; margin-top: var(--sp-2); }
+    .chart-x span { flex: 1; text-align: center; font-size: 11px; color: var(--text-3); min-width: 0; }
+    .chart-legend { display: flex; gap: var(--sp-5); font-size: var(--fs-xs); color: var(--text-2); margin-top: var(--sp-3); flex-wrap: wrap; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .chart-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+    /* Горизонтальные полосы */
+    .hbars { display: flex; flex-direction: column; gap: var(--sp-4); }
+    .hbar-head { display: flex; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); margin-bottom: 6px; }
+    .hbar-head .val { font-weight: 600; white-space: nowrap; }
+    .hbar { height: 8px; background: var(--surface-2); border-radius: var(--r-pill); overflow: hidden; }
+    .hbar > i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--text); }
+    .hbar > i.is-accent { background: var(--accent); }
+    .hbar > i.is-muted { background: var(--text-3); }
+
+    .dash-note { margin-top: var(--sp-5); padding: var(--sp-3) var(--sp-4); border: 1px dashed var(--line-strong); border-radius: var(--r-md); color: var(--text-3); font-size: var(--fs-sm); }
+    .placeholder-panel { min-height: 240px; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .stat .stat-value { font-variant-numeric: tabular-nums; }
+    .grid-2-top { margin-top: var(--sp-4); }
+
+    @media (max-width: 767px) {
+      .chart-wrap { grid-template-columns: 40px minmax(0, 1fr); }
+      .chart-x span:not(.keep-m) { visibility: hidden; }
+      .chart-x span { font-size: 10px; }
+      .chart-area, .chart-y { height: 180px; }
+    }
+  </style>
+</head>
+<body data-page="reports" data-crumbs="Campus Sport|Отчёты">
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" data-shell="topbar"></header>
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1>Отчёты</h1>
+          <p class="page-sub">Встроенные дашборды Superset · Campus Sport · сентябрь 2026</p>
+        </div>
+        <div class="actions">
+          <select class="select" aria-label="Период" style="min-width:200px">
+            <option selected>Сентябрь 2026</option>
+            <option>Август 2026</option>
+            <option>Последние 30 дней</option>
+            <option>Сезон 2025/26</option>
+          </select>
+          <button class="btn"><i data-lucide="external-link"></i>Открыть в Superset</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="is-active" data-tab="revenue">Выручка</button>
+        <button data-tab="load">Загрузка площадок</button>
+        <button data-tab="clients">Клиенты</button>
+        <button data-tab="sources">Источники заказов</button>
+      </div>
+
+      <!-- ============ Выручка (активная вкладка — плейсхолдер дашборда) ============ -->
+      <section data-tab-panel="revenue" class="is-active">
+        <div class="grid grid-4">
+          <div class="stat">
+            <div class="stat-label"><i data-lucide="wallet" class="ico-sm"></i>Выручка</div>
+            <div class="stat-value money">4 812 000 ₽</div>
+            <div class="stat-delta up">за сентябрь</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label"><i data-lucide="receipt-text" class="ico-sm"></i>Средний чек</div>
+            <div class="stat-value money">7 450 ₽</div>
+            <div class="stat-delta">по оплаченным заказам</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label"><i data-lucide="gauge" class="ico-sm"></i>Загрузка</div>
+            <div class="stat-value">68%</div>
+            <div class="stat-delta">от доступных часов</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label"><i data-lucide="user-plus" class="ico-sm"></i>Новых клиентов</div>
+            <div class="stat-value">142</div>
+            <div class="stat-delta up">за сентябрь</div>
+          </div>
+        </div>
+
+        <div class="card grid-2-top">
+          <div class="card-head">
+            <h3>Выручка по дням</h3>
+            <span class="subtle">сентябрь 2026 · ₽, тыс.</span>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-y"><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
+            <div>
+              <div class="chart-area">
+                <div class="chart-col"><span class="bar" style="height:60%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:55%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:62%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:70%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:92%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:96%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:58%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:54%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:60%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:66%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:72%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:95%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:98%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:61%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:57%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:63%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:68%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:71%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:94%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:99%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:64%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:59%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:62%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:67%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:73%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:97%"></span></div>
+                <div class="chart-col"><span class="bar is-weekend" style="height:100%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:65%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:70%"></span></div>
+                <div class="chart-col"><span class="bar" style="height:74%"></span></div>
+              </div>
+              <div class="chart-x">
+                <span class="keep-m">1</span><span></span><span></span><span></span><span class="keep-m">5</span><span></span><span></span><span></span><span></span><span class="keep-m">10</span><span></span><span></span><span></span><span></span><span class="keep-m">15</span><span></span><span></span><span></span><span></span><span class="keep-m">20</span><span></span><span></span><span></span><span></span><span class="keep-m">25</span><span></span><span></span><span></span><span class="keep-m">30</span>
+              </div>
+              <div class="chart-legend">
+                <span><i style="background:var(--text)"></i>Будни</span>
+                <span><i style="background:var(--accent)"></i>Выходные</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2 grid-2-top">
+          <div class="card">
+            <div class="card-head">
+              <h3>Топ площадок</h3>
+              <span class="subtle">выручка, ₽</span>
+            </div>
+            <div class="hbars">
+              <div>
+                <div class="hbar-head"><span>Футбольный манеж 34 × 18</span><span class="val money">1 240 000 ₽</span></div>
+                <div class="hbar"><i style="width:100%"></i></div>
+              </div>
+              <div>
+                <div class="hbar-head"><span>Баскетбольный зал</span><span class="val money">980 000 ₽</span></div>
+                <div class="hbar"><i style="width:79%"></i></div>
+              </div>
+              <div>
+                <div class="hbar-head"><span>Зал 15 × 15</span><span class="val money">760 000 ₽</span></div>
+                <div class="hbar"><i style="width:61%"></i></div>
+              </div>
+              <div>
+                <div class="hbar-head"><span>Мини-поле 20 × 10</span><span class="val money">520 000 ₽</span></div>
+                <div class="hbar"><i style="width:42%"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Источники заказов</h3>
+              <span class="subtle">доля в выручке</span>
+            </div>
+            <div class="hbars">
+              <div>
+                <div class="hbar-head"><span>CRM</span><span class="val">54%</span></div>
+                <div class="hbar"><i style="width:54%"></i></div>
+              </div>
+              <div>
+                <div class="hbar-head"><span>Сайт</span><span class="val">31%</span></div>
+                <div class="hbar"><i class="is-accent" style="width:31%"></i></div>
+              </div>
+              <div>
+                <div class="hbar-head"><span>Виджет</span><span class="val">15%</span></div>
+                <div class="hbar"><i class="is-muted" style="width:15%"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="dash-note">Данные встраиваются из Superset; оформление — по токенам дизайн-системы.</p>
+      </section>
+
+      <!-- ============ Остальные вкладки: заглушки дашбордов ============ -->
+      <section data-tab-panel="load">
+        <div class="card placeholder-panel">
+          <div>
+            <h3>Загрузка площадок</h3>
+            <p class="muted" style="margin-top:8px">Дашборд встраивается из Superset</p>
+          </div>
+        </div>
+      </section>
+      <section data-tab-panel="clients">
+        <div class="card placeholder-panel">
+          <div>
+            <h3>Клиенты</h3>
+            <p class="muted" style="margin-top:8px">Дашборд встраивается из Superset</p>
+          </div>
+        </div>
+      </section>
+      <section data-tab-panel="sources">
+        <div class="card placeholder-panel">
+          <div>
+            <h3>Источники заказов</h3>
+            <p class="muted" style="margin-top:8px">Дашборд встраивается из Superset</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>
